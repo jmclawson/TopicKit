@@ -170,13 +170,15 @@ for (topic in 1:ldak.k) {
 }
 attr(ldak.topics, "variable.labels")[t.start:t.end] <- ldak.topwords
 
-# Add filters by the different factors
-ldak.topics.by.auth <- ldak.topics[,c(which(colnames(ldak.topics)=="factor.auth"),t.start:t.end)]
-ldak.topics.by.auth <- ddply(as.data.frame(ldak.topics.by.auth),"factor.auth",numcolwise(mean))
-ldak.topics.by.sex <- ldak.topics[,c(which(colnames(ldak.topics)=="factor.sex"),t.start:t.end)]
-ldak.topics.by.sex <- ddply(as.data.frame(ldak.topics.by.sex),"factor.sex",numcolwise(mean))
-ldak.topics.by.nat <- ldak.topics[,c(which(colnames(ldak.topics)=="factor.nat"),t.start:t.end)]
-ldak.topics.by.nat <- ddply(as.data.frame(ldak.topics.by.nat),"factor.nat",numcolwise(mean))
+# Add filtered views for each additional column
+ldak.topics.by <- list()
+for (ldak.factor in 4:(t.start-2)){
+  print(ldak.factor)
+  factorname <- colnames(ldak.topics)[ldak.factor]
+  ldak.topics.by[[factorname]] <- ldak.topics[,c(ldak.factor,t.start:t.end)]
+  ldak.topics.by[[factorname]] <- ddply(as.data.frame(ldak.topics.by[[factorname]]),factorname,numcolwise(mean))
+  rm(factorname)
+}
 
 # Plot something suggestive comparing author nationality to topic counts per document
 plot(unlist(ldak.topics["factor.nat"]), unlist(ldak.topics["topic.count"]), xlab="Nationality", ylab="Number of topics per text", main="Does author nationality affect topic diversity?", col = "dark red")
