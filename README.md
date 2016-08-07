@@ -14,6 +14,6 @@ In **LDAkit.R**, redefine `ldak.pos` to extract text elements other than singula
 ## After the first run
 After the first run, **LDAkit.R** will only rerun the topic model, skipping the steps to download texts, to chunk them, and to extract text elements. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
-1. Erase `texts` directory to download texts.
-2. Erase `txt` directory to divide the text into chunks.
-3. Erase directory beginning with `txt-` to repeat the extraction of a given element.
+1. Erase `\texts` directory to download texts.
+2. Erase `\txt` directory to divide the text into chunks.
+3. Erase directory beginning with `\txt-` to repeat the extraction of a given element.
