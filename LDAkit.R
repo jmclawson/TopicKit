@@ -1,5 +1,10 @@
-# Sets the topic to run only on singular common nouns and adjectives, but add others
+# Define these choices:
+# The variable ldak.chunksize sets the number of words to subdivide each document.
+# The variable ldak.pos sets Mallet to run only on particular parts of speech.
+# The variable ldak.k determines the number of topics to seek.
+ldak.chunksize <- 1000
 ldak.pos <- c("NN")
+ldak.k <- 45
 
 # Start by reading the CSV
 if (!file.exists("import.csv")){
@@ -17,11 +22,18 @@ if (!file.exists("texts")) {
   rm(ldak.filename,number)
 }
 
-# Load document contents
+# Load document contents, imputing missing or negative endpoints
 ldak.texts <- c()
 for (number in 1:nrow(ldak.import)){
   temp.list <- list()
   filename <- paste("texts/",number,".txt",sep="")
+  if(is.null(ldak.import[number,3])){
+    temp.text <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
+    ldak.import[number,3] <- if(length(grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE))==0) length(temp.text) else grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE)
+  }
+  if(ldak.import[number,3]<0){
+    ldak.import[number,3] <- length(temp.text)+ldak.import[number,3]
+  }
   start <- ldak.import[number,2]-1
   end <- ldak.import[number,3]-ldak.import[number,2]
   temp.list <- scan(file=filename, what="character", sep="\n", skip=start, nlines=end)
@@ -58,7 +70,7 @@ makeFlexTextChunks <- function(ldak.doc.text, chunk.size=1000, percentage=TRUE){
 
 ldak.chunks <- list()
 for (number in 1:nrow(ldak.import)) {
-  ldak.chunks[[number]] <- makeFlexTextChunks(ldak.texts[number], chunk.size = 1000, percentage = FALSE)
+  ldak.chunks[[number]] <- makeFlexTextChunks(ldak.texts[number], chunk.size = ldak.chunksize, percentage = FALSE)
 }
 
 # If "txt" dir doesn't exist, write text to files in chunks ~1,000 each
@@ -127,10 +139,9 @@ docs <- loadDocuments(data.dir);
 # in order to improve model performance.
 stoplist <- "stop-words/stop-words_english_2_en.txt"
 
-# Train a document model with 45 topics. This will run Mallet over the documents
-# from data.dir and store the results along with some supporting information 
-# in a convenient data structure
-ldak.k <- 45
+# Train a document model with topics numbering as much as ldak.k.
+# This will run Mallet on the data in the directory being used, 
+# and store the results in a data structure we can later access.
 model <- trainSimpleLDAModel(docs, ldak.k, stoplist=stoplist)
 
 # Print the resulting topics as wordclouds for easy visualization.
@@ -172,21 +183,17 @@ attr(ldak.topics, "variable.labels")[t.start:t.end] <- ldak.topwords
 
 # Add filtered views for each additional column
 ldak.topics.by <- list()
-for (ldak.factor in 4:(t.start-2)){
-  print(ldak.factor)
+for (ldak.factor in 3:(t.start-2)){
   factorname <- colnames(ldak.topics)[ldak.factor]
   ldak.topics.by[[factorname]] <- ldak.topics[,c(ldak.factor,t.start:t.end)]
   ldak.topics.by[[factorname]] <- ddply(as.data.frame(ldak.topics.by[[factorname]]),factorname,numcolwise(mean))
+  write.csv(ldak.topics.by[[factorname]],file=paste("topics-by-",factorname,".csv",sep=""))
   rm(factorname)
 }
 
 # Plot something suggestive comparing author nationality to topic counts per document
-plot(unlist(ldak.topics["factor.nat"]), unlist(ldak.topics["topic.count"]), xlab="Nationality", ylab="Number of topics per text", main="Does author nationality affect topic diversity?", col = "dark red")
+plot(unlist(ldak.topics["nationality"]), unlist(ldak.topics["topic.count"]), xlab="Nationality", ylab="Number of topics per text", main="Does author nationality affect topic diversity?", col = "dark red")
 
 # Export useful CSV files for analysis
 write.csv(ldak.topics, file=paste("topics",paste(ldak.pos,collapse="-"),".csv",sep=""))
-write.csv(ldak.topics.by.auth, file=paste("topics-by-auth",paste(ldak.pos,collapse="-"),".csv",sep=""))
-write.csv(ldak.topics.by.sex, file=paste("topics-by-sex",paste(ldak.pos,collapse="-"),".csv",sep=""))
-write.csv(ldak.topics.by.nat, file=paste("topics-by-nationality",paste(ldak.pos,collapse="-"),".csv",sep=""))
 View(ldak.topics)
-
