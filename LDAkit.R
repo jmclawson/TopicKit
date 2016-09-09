@@ -12,21 +12,35 @@ if (!file.exists("import.csv")){
 }
 ldak.import <- read.csv("import.csv", colClasses=c(url="character", start.line="numeric", end.line="numeric", title="character", year="numeric"))
 
-# Download the files into a new directory
+# Download the files as text into a new directory
+ldak.filenames <- c()
+ldak.types <- sapply(strsplit(ldak.import[["url"]], split="\\."), tail, 1L)
 if (!file.exists("texts")) {
   dir.create(file.path(getwd(), "texts"))
   for (number in 1:nrow(ldak.import)){
-    ldak.filename <- paste("texts/",number,".txt",sep="")
-    download.file(ldak.import[number,1], destfile = ldak.filename, method="auto")
+    ldak.thisfilename <- paste("texts/", number, ".", sep="")
+    ldak.thisfilename.type <- paste(ldak.thisfilename, ldak.types[number], sep="")
+    download.file(ldak.import[number,1], destfile = ldak.thisfilename.type, method="auto")
+    if (!ldak.types[number]=="txt") {
+      library(XML)
+      char.vec <- paste(readLines(ldak.thisfilename.type, warn = FALSE), collapse=" ")
+      doc <- htmlParse(char.vec, asText = T)
+      text <- xpathSApply(doc, "//text()[not(ancestor::script)][not(ancestor::style)][not(ancestor::noscript)][not(ancestor::form)]", xmlValue)
+      txt <- paste(text, collapse="\n")
+      write(txt,file=paste(ldak.thisfilename, "txt", sep="."),append=FALSE,sep="")
+      rm(char.vec,doc,text,txt)
+    }
+    ldak.thisfilename <- paste(ldak.thisfilename, "txt", sep="")
+    ldak.filenames <- c(ldak.filenames,ldak.thisfilename)
   }
-  rm(ldak.filename,number)
+  rm(ldak.thisfilename,ldak.thisfilename.type,number,ldak.types)
 }
 
 # Load document contents, imputing missing or negative endpoints
 ldak.texts <- c()
 for (number in 1:nrow(ldak.import)){
   temp.list <- list()
-  filename <- paste("texts/",number,".txt",sep="")
+  filename <- ldak.filenames[number]
   if(is.null(ldak.import[number,3])){
     temp.text <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
     ldak.import[number,3] <- if(length(grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE))==0) length(temp.text) else grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE)
@@ -40,6 +54,7 @@ for (number in 1:nrow(ldak.import)){
   ldak.texts[number] <- paste(unlist(temp.list), collapse = " \n")
 }
 rm(filename,temp.list,start,end,number)
+
 
 # Chunk the text (from Jockers' Text Analysis with R)
 makeFlexTextChunks <- function(ldak.doc.text, chunk.size=1000, percentage=TRUE){
@@ -197,3 +212,10 @@ plot(unlist(ldak.topics["nationality"]), unlist(ldak.topics["topic.count"]), xla
 # Export useful CSV files for analysis
 write.csv(ldak.topics, file=paste("topics",paste(ldak.pos,collapse="-"),".csv",sep=""))
 View(ldak.topics)
+
+# Acknowledgments (to be added to a NOTICES file)
+# conversion of HTML to text adapted from Tony Breyal
+# https://github.com/tonybreyal/Blog-Reference-Functions/blob/master/R/htmlToText/htmlToText.R
+#
+# This project includes code derived from Audenaert, "Topic Modeling R Tools"
+# https://github.com/audenaert/TopicModelingRTools
