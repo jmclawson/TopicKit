@@ -10,12 +10,12 @@ ldak.k <- 45
 if (!file.exists("import.csv")){
   stop("Please make sure to have an import.csv file in the working directory.")
 }
-ldak.import <- read.csv("import.csv", colClasses=c(url="character", start.line="numeric", end.line="numeric", title="character", year="numeric"))
+ldak.import <- read.csv("import.csv", colClasses=c(url="character", start.line="character", end.line="character", title="character", year="numeric"))
 
 # Download the files as text into a new directory
-ldak.filenames <- c()
 ldak.types <- sapply(strsplit(ldak.import[["url"]], split="\\."), tail, 1L)
 if (!file.exists("texts")) {
+  ldak.filenames <- c()
   dir.create(file.path(getwd(), "texts"))
   for (number in 1:nrow(ldak.import)){
     ldak.thisfilename <- paste("texts/", number, ".", sep="")
@@ -41,20 +41,26 @@ ldak.texts <- c()
 for (number in 1:nrow(ldak.import)){
   temp.list <- list()
   filename <- ldak.filenames[number]
-  if(is.null(ldak.import[number,3])){
-    temp.text <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
-    ldak.import[number,3] <- if(length(grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE))==0) length(temp.text) else grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE)
+  temp.text <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
+  if(!is.na(suppressWarnings(as.numeric(ldak.import[number,2])))){} else {
+    ldak.import[number,2] <- if(length(grep(ldak.import[number,2], temp.text, ignore.case = TRUE))==0) 0 else grep(ldak.import[number,2], temp.text, ignore.case = TRUE)
   }
-  if(ldak.import[number,3]<0){
-    ldak.import[number,3] <- length(temp.text)+ldak.import[number,3]
+  if(!is.na(suppressWarnings(as.numeric(ldak.import[number,3])))){
+    if(as.numeric(ldak.import[number,3])<0){
+      ldak.import[number,3] <- length(temp.text)+as.numeric(ldak.import[number,3])
+  }} else {
+      ldak.import[number,3] <- if(length(grep(ldak.import[number,3], temp.text, ignore.case = TRUE))==0) length(temp.text) else grep(ldak.import[number,3], temp.text, ignore.case = TRUE)+1
   }
-  start <- ldak.import[number,2]-1
-  end <- ldak.import[number,3]-ldak.import[number,2]
+  # if(is.null(ldak.import[number,3])){
+  #   temp.text <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
+  #   ldak.import[number,3] <- if(length(grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE))==0) length(temp.text) else grep("end of the project gutenberg ebook", temp.text, ignore.case = TRUE)
+  # }
+  start <- as.numeric(ldak.import[number,2])-1
+  end <- as.numeric(ldak.import[number,3])-as.numeric(ldak.import[number,2])
   temp.list <- scan(file=filename, what="character", sep="\n", skip=start, nlines=end)
   ldak.texts[number] <- paste(unlist(temp.list), collapse = " \n")
 }
 rm(filename,temp.list,start,end,number)
-
 
 # Chunk the text (from Jockers' Text Analysis with R)
 makeFlexTextChunks <- function(ldak.doc.text, chunk.size=1000, percentage=TRUE){
@@ -100,7 +106,6 @@ if (!dir.exists("txt")) {
   rm(number,sub)
 }
 rm(ldak.chunks,ldak.texts)
-
 
 ## Strip out everything but the common nouns, but only if dir doesn't exist
 # via http://stackoverflow.com/questions/30995232/how-to-use-opennlp-to-get-pos-tags-in-r
