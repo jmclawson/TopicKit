@@ -10,6 +10,14 @@ ldak.k <- 45
 ldak.stops <- c()
 ldak.project <- "import"
 
+# To run:
+# 1. load this file
+# 2. ldak.make.ready()
+# - 2.5 (optional) ldak.make.stopwords
+# 3. ldak.make.model()
+# 4. ldak.make.analysis()
+# - 4.5 (optional) ldak.make.distribution("sex","f","m")
+
 # necessary to avoid hitting any one gutenberg mirror too hard
 gutencounter <- sample(1:6, 1)
 newurlvector <- c()
@@ -36,11 +44,8 @@ if (!file.exists("import.csv")){
 }
 ldak.import <- read.csv(paste(ldak.project,".csv",sep=""), colClasses=c(url="character", start.line="character", end.line="character", title="character", year="numeric"))
 
-# this function should check dir- "import/" to see if some files already exist
-# it should then intelligently try to fill in any missing
-# it should also intelligently error check for Gutenberg?
+# Download files to the project folder
 # optional variable: download only x texts
-# optional variable: choose csv file (changes folder structure)
 makeLocalCopy <- function(url, number, project=ldak.project) {
   ldak.type <- sapply(strsplit(url, split="\\."), tail, 1L)
   # Be kind to Gutenberg by using its mirrors
@@ -186,13 +191,7 @@ makeFilterWords <- function(project=ldak.project, file){
   }
 }
 
-ldak.make.stopwords <- function(project=ldak.project){
-  for (text in 1:nrow(ldak.import)){
-    textfile <- paste(text,".txt",sep="")
-    makeFilterWords(project=project,file=textfile)
-  }
-}
-
+### Run this function to download and prepare texts.
 ldak.make.ready <- function(project=ldak.project, pos=ldak.pos, chunksize=ldak.chunksize) {
   if (!file.exists(paste(project, ".csv", sep=""))) {
     stop("Please make sure to specify a CSV file in the working directory.")
@@ -237,12 +236,22 @@ ldak.make.ready <- function(project=ldak.project, pos=ldak.pos, chunksize=ldak.c
   }
 }
 
+### Run this function to automate stopwords.
+# It is *very* time intensive.
+ldak.make.stopwords <- function(project=ldak.project){
+  for (text in 1:nrow(ldak.import)){
+    textfile <- paste(text,".txt",sep="")
+    makeFilterWords(project=project,file=textfile)
+  }
+}
+
 # ===== Now it's time to build a model of topics in these documents
-## Modified from example_1.R in Neal Audenaert's "Topic Modeling R Tools"
+# Modified from example_1.R in Neal Audenaert's "Topic Modeling R Tools"
 
 source("functions/lda.R")
 source("functions/import.R")
 
+### Run this function to make a topic model of the texts
 ldak.make.model <- function(project=ldak.project,k=ldak.k,pos=ldak.pos) {
   # Set data.dir to the directory with data.
   data.dir <- ldak.dir
@@ -271,7 +280,8 @@ ldak.make.model <- function(project=ldak.project,k=ldak.k,pos=ldak.pos) {
   plotTopicWordcloud(model, verbose=T, output=paste(ldak.project,"plots",sep="/"))
 }
 
-## Now modify the output to present the results in a useful format
+
+### Run this funcion to present results in a useful format
 ldak.make.analysis <- function(project=ldak.project){
   # Get and clean up the ids and add them alongside the topics
   library(plyr)
@@ -346,6 +356,14 @@ ldak.make.analysis <- function(project=ldak.project){
   View(ldak.topics)
 }
 
+
+### Run this function to look more closely at particular factors.
+# With the sample import.csv, try some of the following:
+# ldak.make.distribution("sex","f","m")
+# ldak.make.distribution("nationality","american","british")
+#
+# Note that omitting the third argument compares against the average of the whole corpus:
+# ldak.make.distribution("title","Tender Buttons")
 ldak.make.distribution <- function(factorname,compare,compare2="average",project=ldak.project){
   library(reshape2)
   average <<- t(data.frame(colMeans(ldak.topics.by[[factorname]][2:ncol(ldak.topics.by[[factorname]])])))

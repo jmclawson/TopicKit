@@ -3,11 +3,19 @@ A basic interface for fetching and modeling text documents on the web
 
 
 ## Getting started
-Edit "import.csv" to get started. Each row indicates a new document. Add text URLs in the first column. The next two columns define line numbers as cutoff limits for a header and footer. The fourth column is reserved for the text title or some other unique identifier, but remaining columns are optional and unlimited.
+Edit "import.csv" to get started. Each row indicates a new document. Add text URLs in the first column. The next two columns define line numbers as cutoff limits for a header and footer. Remaining columns are optional and unlimited.
 
-If the third column is negative, LDAkit will count backwards from the end of the file. If it is empty, LDAkit will search the file for something indicating the end of a Project Gutenberg book; lacking that, it'll read the file to the end.
+Columns two and three can include either numbers (for line numbers) or text found on the first and last lines, respectively; when given a line of text, the script will automate the counting. If the third column is negative, LDAkit will count backwards from the end of the file. If the third column is empty, it'll read the file to the end.
 
-Set the working directory and run LDAkit.R to download textfiles, divide them into chunks of 1,000 words each, extract user-defined text elements, and run mallet to model a user-defined set of topics on the corpus. 
+Set the working directory and load LDAkit.R with source('LDAkit.r'). To collect a corpus and prepare it, run ldak.make.ready(). The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+
+Optionally, to automate creation of stopwords, which will take a very long time, run ldak.make.stopwords(). The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
+
+To derive a topic model, run ldak.make.model(). The script, only slightly modified from Neal Audenaert's work, will attempt to model the topics in all the texts and create word clouds.
+
+To analyze results, run ldak.make.analysis(). The script will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
+
+To plot comparative graphs of the distribution of topics, run ldak.make.distribution(). The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against.
 
 ## Modifying defaults
 By default, LDAkit will divide longer documents into chunks of 1000 words each before modelling the topics of a corpus, recombining the documents and their results at the end. (It does this to get something approaching parity of size among all the documents in a corpus so that one doesn't confuse the model.) To change the size of these chunks, redefine `ldak.chunksize` at the beginning of **LDAkit.R**.
@@ -16,6 +24,9 @@ By default, the variable `ldak.pos` tells the script to focus only on singular c
 > ldak.pos <- c("NN", "NNS", "JJ")
 
 Finally, set the number of topics you'd like to discover by redefining `ldak.k` at the beginning of the file. 
+
+## Another way to modify defaults
+When calling functions, you can set defaults as optional arguments to avoid changing global defaults.
 
 ## After the first run
 After the first run, **LDAkit.R** will only rerun the topic model, skipping the steps to download texts, to chunk them, and to extract text elements. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
