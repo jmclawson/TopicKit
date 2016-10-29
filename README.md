@@ -26,10 +26,15 @@ By default, the variable `ldak.pos` tells the script to focus only on singular c
 Finally, set the number of topics you'd like to discover by redefining `ldak.k` at the beginning of the file. 
 
 ## Another way to modify defaults
-When calling functions, you can set defaults as optional arguments to avoid changing global defaults.
+When calling functions, you can set defaults as optional arguments to avoid changing global defaults:
+
+1. To modify defaults when collecting and preparing texts, use the optional `project`, `pos`, and `chunksize` arguments with `ldak.make.ready()`: `ldak.make.ready(project="Woolf", pos=c("NN", "JJ"), chunksize=1500)`
+2. To specify project for discovering stopwords, use the optional `project` argument: `ldak.make.stopwords(project="Woolf")`
+3. To modify defaults when running the topic model, use the optional `project`, `k`, and `pos` arguments: `ldak.make.model(project="Woolf",k=90,pos="")` (Keep in mind that the scripts can only model texts that have been prepared using the same `pos` argument in steps 1 and 3.)
+4. To specify which project when analyzing the topic model, use the optional `project` argument: `ldak.make.analysis(project="Woolf")`
 
 ## After the first run
-After the first run, **LDAkit.R** will only rerun the topic model, skipping the steps to download texts, to chunk them, and to extract text elements. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
+After the first run of `ldak.make.ready`, **LDAkit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
 1. Erase `\texts` directory to download texts.
 2. Erase `\txt` directory to divide the text into chunks.
