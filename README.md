@@ -7,15 +7,15 @@ Edit "import.csv" to get started. Each row indicates a new document. Add text UR
 
 Columns two and three can include either numbers (for line numbers) or text found on the first and last lines, respectively; when given a line of text, the script will automate the counting. If the third column is negative, LDAkit will count backwards from the end of the file. If the third column is empty, it'll read the file to the end.
 
-Set the working directory and load LDAkit.R with source('LDAkit.r'). To collect a corpus and prepare it, run ldak.make.ready(). The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+Set the working directory and load LDAkit.R with `source('LDAkit.r')`. To collect a corpus and prepare it, run `ldak.make.ready()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
 
-Optionally, to automate creation of stopwords, which will take a very long time, run ldak.make.stopwords(). The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
+Optionally, to automate creation of stopwords, which will take a very long time, run `ldak.make.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
 
-To derive a topic model, run ldak.make.model(). The script, only slightly modified from Neal Audenaert's work, will attempt to model the topics in all the texts and create word clouds.
+To derive a topic model, run `ldak.make.model()`. The script, only slightly modified from Neal Audenaert's work, will attempt to model the topics in all the texts and create word clouds.
 
-To analyze results, run ldak.make.analysis(). The script will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
+To analyze results, run `ldak.make.analysis()`. The script will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
 
-To plot comparative graphs of the distribution of topics, run ldak.make.distribution(). The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against.
+To plot comparative graphs of the distribution of topics, run `ldak.make.distribution()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against.
 
 ## Modifying defaults
 By default, LDAkit will divide longer documents into chunks of 1000 words each before modelling the topics of a corpus, recombining the documents and their results at the end. (It does this to get something approaching parity of size among all the documents in a corpus so that one doesn't confuse the model.) To change the size of these chunks, redefine `ldak.chunksize` at the beginning of **LDAkit.R**.
