@@ -18,7 +18,7 @@ To analyze results, run `ldak.make.analysis()`. The script will splice against e
 To plot comparative graphs of the distribution of topics, run `ldak.make.distribution()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against.
 
 ## Modifying defaults
-By default, LDAkit will divide longer documents into chunks of 1000 words each before modelling the topics of a corpus, recombining the documents and their results at the end. (It does this to get something approaching parity of size among all the documents in a corpus so that one doesn't confuse the model.) To change the size of these chunks, redefine `ldak.chunksize` at the beginning of **LDAkit.R**.
+By default, LDAkit will work with a CSV file called **import.csv** to create a project called "import". To direct to another CSV file, modify `ldak.project`. It will download files into a project subfolder and divide documents into chunks of 1000 words before modelling the topics of a corpus, recombining the documents and their results at the end. (It does this to get something approaching parity of size among all the documents in a corpus so that one doesn't confuse the model.) To change the size of these chunks, redefine `ldak.chunksize` at the beginning of **LDAkit.R**.
 
 By default, the variable `ldak.pos` tells the script to focus only on singular common nouns ("`NN`"). To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line:
 > ldak.pos <- c("NN", "NNS", "JJ")
@@ -28,7 +28,7 @@ Finally, set the number of topics you'd like to discover by redefining `ldak.k` 
 ## Another way to modify defaults
 When calling functions, you can set defaults as optional arguments to avoid changing global defaults:
 
-1. To modify defaults when collecting and preparing texts, use the optional `project`, `pos`, and `chunksize` arguments with `ldak.make.ready()`: `ldak.make.ready(project="Woolf", pos=c("NN", "JJ"), chunksize=1500)`
+1. To modify defaults when collecting and preparing texts, use the optional `project`, `pos`, and `chunksize` arguments: `ldak.make.ready(project="Woolf", pos=c("NN", "JJ"), chunksize=1500)`
 2. To specify project for discovering stopwords, use the optional `project` argument: `ldak.make.stopwords(project="Woolf")`
 3. To modify defaults when running the topic model, use the optional `project`, `k`, and `pos` arguments: `ldak.make.model(project="Woolf",k=90,pos="")` (Keep in mind that the scripts can only model texts that have been prepared using the same `pos` argument in steps 1 and 3.)
 4. To specify which project when analyzing the topic model, use the optional `project` argument: `ldak.make.analysis(project="Woolf")`
