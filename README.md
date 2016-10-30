@@ -1,5 +1,5 @@
 # TopicKit
-A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit.R automates many steps for data munging, and it applies best topic modeling practices by default, allowing for quick testing of hypotheses and for replicability in collaborative projects.
+A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit automates many steps for data munging, and it applies best topic modeling practices by default, allowing for quick testing of hypotheses and for replicability in collaborative projects.
 
 ## Installation
 *(here I need to talk about how to install R, how to install Java, etc.)*
@@ -8,7 +8,7 @@ A basic interface for planning, fetching, topic modeling, and analyzing a corpus
 A sample **import.csv** is included. Either modify that file as a start, or create your own, following these steps:
 
 1. Create a spreadsheet with three or more columns and with one row per text.
-2. In the first row, define the column headers. The first column should be for the URL, the second should be for the opening line, and the third should be for the final line. Any additional columns are optional, but they will all be used by **TopicKit.R**. Good ideas include title, author, author sex, author nationality, genre, year of publication, etc. **TopicKit.R** will automate additional visualizations for columns with binary options, like "male" and "female", so consider how you might incorporate this kind of information.
+2. In the first row, define the column headers. The first column should be for the URL, the second should be for the opening line, and the third should be for the final line. Any additional columns are optional, but they will all be used by TopicKit. Good ideas include title, author, author sex, author nationality, genre, year of publication, etc. TopicKit will automate additional visualizations for columns with binary options, like "male" and "female", so consider how you might incorporate this kind of information.
 3. Devote each subsequent row to one text. In the first column, put a URL for that row's text.
 4. Into the second column, copy and paste the first line of the text to be modeled. (It isn't necessary to copy the entire line, just a string of unique-enough words to bypass what comes before it.) Alternatively, include a line number for this first line. Web pages and text files often include headers with unnecessary information, and we want to ignore the irrelevant stuff.
 5. Into the third column, copy and paste the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number or (as a negative number) the number of lines from the bottom.
@@ -45,7 +45,7 @@ Following best practices (*citation to come*), TopicKit will prepare data before
 Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. But we need to start somewhere. With the `tk.k` variable, TopicKit sets a default of 45 topics. You can change this default in your own installation or use the optional `k` argument in `tk.make.model()`.
 
 ## After the first run
-After the first run of `tk.make.ready`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
+After the first run of `tk.make.ready`, TopicKit will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
 1. Erase **\texts** directory to download texts.
 2. Erase **\txt** directory to divide the text into chunks.
