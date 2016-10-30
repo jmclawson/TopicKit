@@ -4,7 +4,7 @@ A basic interface for planning, fetching, topic modeling, and analyzing a corpus
 ## Installation
 *(here I need to talk about how to install R, how to install Java, etc.)*
 
-## Preparing a project
+## Preparing a Project
 A sample **import.csv** is included. Either modify that file as a start, or create your own, following these steps:
 
 1. Create a spreadsheet with three or more columns and with one row per text.
@@ -29,7 +29,7 @@ To plot comparative graphs of the distribution of topics, run `tk.make.distribut
 - `tk.make.distribution("sex","f","m")`
 - `tk.make.distribution("sex","f","m",project="Woolf")`
 
-## Another way to change settings
+## Optional Arguments
 When calling functions, you can use settings that are different from the defaults using optional arguments:
 
 1. To modify defaults when collecting and preparing texts, use the optional `project`, `pos`, and `chunksize` arguments: `tk.make.ready(project="Woolf", pos=c("NN", "JJ"), chunksize=1500)`
@@ -37,13 +37,12 @@ When calling functions, you can use settings that are different from the default
 3. To modify defaults when running the topic model, use the optional `project`, `k`, and `pos` arguments: `tk.make.model(project="Woolf",k=90,pos="")` (Keep in mind that the scripts can only model texts that have been prepared using the same `pos` argument in steps 1 and 3.)
 4. To specify which project when analyzing the topic model, use the optional `project` argument: `tk.make.analysis(project="Woolf")`
 
-## Modifying defaults
-By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To direct to another CSV file, modify `tk.project`. It will download files into a project subfolder and divide documents into chunks of 1000 words before modelling the topics of a corpus, recombining the documents and their results at the end. (It does this to get something approaching parity of size among all the documents in a corpus so that one doesn't confuse the model.) To change the size of these chunks, redefine `tk.chunksize` at the beginning of **TopicKit.R**.
+## Under the Hood (or, Assumptions and Defaults)
+By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To specify another project as default, modify `tk.project` to point to to another CSV file. All work in a project will be saved in a subfolder called by that project name.
 
-By default, the variable `tk.pos` tells the script to focus only on singular common nouns ("`NN`"). To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line:
-> tk.pos <- c("NN", "NNS", "JJ")
+Following best practices (*citation to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `tk.chunksize` at the beginning of **TopicKit.R**. Next, it strips out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, redefine the default at the beginning of **TopicKit.R** using the following line: `tk.pos <- c("NN", "NNS", "JJ")`
 
-Finally, set the number of topics you'd like to discover by redefining `tk.k` at the beginning of the file. 
+Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. But we need to start somewhere. With the `tk.k` variable, TopicKit sets a default of 45 topics. You can change this default in your own installation or use the optional `k` argument in `tk.make.model()`.
 
 ## After the first run
 After the first run of `tk.make.ready`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
