@@ -1,22 +1,21 @@
 # Define these choices to set defaults, or define them when calling functions:
-# The variable tk.chunksize sets the number of words to subdivide each document.
-# The variable tk.pos sets Mallet to run only on particular parts of speech.
-# The variable tk.k determines the number of topics to seek.
-# Add tk.stops to filter out words that sneak through, including proper nouns.
-# Finally, tk.project sets the default project name while allowing for files of a number of projects to coexist
-tk.chunksize <- 1000
-tk.pos <- c("NN")
-tk.k <- 45
-tk.stops <- c()
-tk.project <- "import"
+# The variable set.chunksize sets the number of words to subdivide each document.
+# The variable set.pos sets Mallet to run only on particular parts of speech.
+# The variable set.k determines the number of topics to seek.
+# Add set.stops to filter out words that sneak through, including proper nouns.
+# Finally, set.project sets the default project name while allowing for files of a number of projects to coexist
+set.chunksize <- 1000
+set.pos <- c("NN")
+set.k <- 50
+set.stops <- c()
+set.project <- "import"
 
 # To run:
 # 1. load this file
-# 2. tk.make.ready()
-# - 2.5 (optional) tk.make.stopwords
-# 3. tk.make.model()
-# 4. tk.make.analysis()
-# - 4.5 (optional) tk.make.distribution("sex","f","m")
+# 2. do.preparation()
+# - 2.5 (optional) do.stopwords()
+# 3. do.model()
+# 4 do.comparison("sex","f","m") 
 
 # necessary to avoid hitting any one gutenberg mirror too hard
 gutencounter <- sample(1:6, 1)
@@ -38,15 +37,9 @@ if(!require("ggplot2"))
 if(!require("reshape2"))
   install.packages("reshape2")
 
-# Start by reading the CSV
-if (!file.exists("import.csv")){
-  stop("Please make sure to have an import.csv file in the working directory.")
-}
-tk.import <- read.csv(paste(tk.project,".csv",sep=""), colClasses=c(url="character", start.line="character", end.line="character", title="character", year="numeric"))
-
 # Download files to the project folder
-# optional variable: download only x texts
-makeLocalCopy <- function(url, number, project=tk.project) {
+# future variable: download only x texts
+makeLocalCopy <- function(url, number, project=set.project) {
   tk.type <- sapply(strsplit(url, split="\\."), tail, 1L)
   # Be kind to Gutenberg by using its mirrors
   urlsplit <- strsplit(url, split="/")[[1]]
@@ -61,7 +54,7 @@ makeLocalCopy <- function(url, number, project=tk.project) {
     gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
     newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urlid,paste(urlid,"txt",sep="."),sep="/")
     newurlvector <- c(newurlvector,newurl)
-    if (gutencounter>5) {gutencounter <- 1} else {gutencounter <- gutencounter + 1}
+    if (gutencounter>5) {gutencounter <<- 1} else {gutencounter <<- gutencounter + 1}
     url <- newurl
     tk.type <- "txt"
   }
@@ -84,8 +77,8 @@ makeLocalCopy <- function(url, number, project=tk.project) {
 
 makeCleanText <- function(filename, start, end){
   dirtytext <- scan(file=filename, what="character", sep="\n", blank.lines.skip = FALSE)
-  if(!is.na(suppressWarnings(as.numeric(start)))){} else {
-    start <- if(length(grep(start, dirtytext, ignore.case = TRUE))==0) 0 else grep(start, dirtytext, ignore.case = TRUE)
+  if(!is.na(suppressWarnings(as.numeric(start)))) {this.start <- start} else {
+    this.start <- if(length(grep(start, dirtytext, ignore.case = TRUE))==0) 0 else grep(start, dirtytext, ignore.case = TRUE)
   }
   if(!is.na(suppressWarnings(as.numeric(end)))){
     if(as.numeric(end)<0){
@@ -93,9 +86,9 @@ makeCleanText <- function(filename, start, end){
     }} else {
       end <- if(length(grep(end, dirtytext, ignore.case = TRUE))==0) length(dirtytext) else grep(end, dirtytext, ignore.case = TRUE)+1
     }
-  end <- as.numeric(end)-as.numeric(start)
-  start <- as.numeric(start)-1
-  temp.texts <- paste(unlist(scan(file=filename, what="character", sep="\n", skip=start, nlines=end)), collapse="\n")
+  this.end <- as.numeric(end)-as.numeric(this.start)
+  this.start <- as.numeric(this.start)-1
+  temp.texts <- paste(unlist(scan(file=filename, what="character", sep="\n", skip=this.start, nlines=this.end)), collapse="\n")
   return(temp.texts)
 }
 
@@ -138,7 +131,7 @@ makeEntities <- function(doc, kind) {
 }
 
 # Filter out everything but given part(s) of speech, via http://stackoverflow.com/questions/30995232/how-to-use-opennlp-to-get-pos-tags-in-r
-makeFilterTokens <- function(file, pos, entities=F, project=tk.project, dir=paste(getwd(), paste("txt", paste(pos,collapse = "-"), sep="-"), sep="/")){
+makeFilterTokens <- function(file, pos, entities=F, project=set.project, dir=paste(getwd(), paste("txt", paste(pos,collapse = "-"), sep="-"), sep="/")){
   startfile <- paste(paste(project, "txt/", sep="/"),file,sep="")
   txt <- as.String(readLines(startfile))
   if (!entities==T) {
@@ -151,17 +144,17 @@ makeFilterTokens <- function(file, pos, entities=F, project=tk.project, dir=past
   POSAnnotation <- NLP::annotate(txt, Maxent_POS_Tag_Annotator(), wordAnnotation)
   POSwords <- subset(POSAnnotation, type == "word")
   tags <- sapply(POSwords$features, '[[', "POS")
-  tk.pos.index <- paste("(",paste(pos,collapse="|"),")",sep="")
-  thisPOSindex <- grep(paste(tk.pos.index,"$",sep=""), tags)
+  set.pos.index <- paste("(",paste(pos,collapse="|"),")",sep="")
+  thisPOSindex <- grep(paste(set.pos.index,"$",sep=""), tags)
   tokenizedAndTagged <- sprintf("%s/%s", txt[POSwords][thisPOSindex], tags[thisPOSindex])
   untokenizedAndTagged <- paste(tokenizedAndTagged, collapse = " ")
-  untokenizedAndTagged <- gsub(paste("\\/",tk.pos.index,sep=""), "", untokenizedAndTagged)
+  untokenizedAndTagged <- gsub(paste("\\/",set.pos.index,sep=""), "", untokenizedAndTagged)
   pos.savefile <- paste(dir, file, sep="/")
   write(untokenizedAndTagged, file=pos.savefile, append = FALSE, sep="")
 }
 
-# This function automates the creation of stoplists. Set entity="person" or "location". Or use tk.make.stopwords().
-tk.filter.name <- function(project=tk.project, file, kind="person"){
+# This function automates the creation of stoplists. Set entity="person" or "location". Or use do.stopwords().
+tk.filter.name <- function(project=set.project, file, kind="person"){
   if (!file.exists(paste(project,"entities",sep="/"))) {dir.create(paste(project, "entities", sep="/"))}
   if (!file.exists(paste(project,"/entities/",kind,"-",file))) {
     startfile <- paste(paste(project, "texts/", sep="/"),file,sep="")
@@ -175,7 +168,7 @@ tk.filter.name <- function(project=tk.project, file, kind="person"){
   }
 }
 
-makeFilterWords <- function(project=tk.project, file){
+makeFilterWords <- function(project=set.project, file){
   if (!file.exists(paste(project,"entities",sep="/"))) {dir.create(paste(project, "entities", sep="/"))}
   if (!file.exists(paste(project,"/entities/","both-",file))) {
     startfile <- paste(paste(project, "texts/", sep="/"),file,sep="")
@@ -192,12 +185,12 @@ makeFilterWords <- function(project=tk.project, file){
 }
 
 ### Run this function to download and prepare texts.
-tk.make.ready <- function(project=tk.project, pos=tk.pos, chunksize=tk.chunksize) {
+do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunksize) {
   if (!file.exists(paste(project, ".csv", sep=""))) {
     stop("Please make sure to specify a CSV file in the working directory.")
   }
   if (!file.exists(project)) {dir.create(file.path(getwd(), project))}
-  tk.import <<- read.csv(paste(project,".csv",sep=""), colClasses=c(url="character", start.line="character", end.line="character", title="character", year="numeric"))
+  tk.import <<- read.csv(paste(project,".csv",sep=""), colClasses="character")
   # Load document contents, imputing missing or negative endpoints.
   if (!file.exists(paste(project,"texts",sep="/"))) {
     tk.filenames <- c()
@@ -234,11 +227,12 @@ tk.make.ready <- function(project=tk.project, pos=tk.pos, chunksize=tk.chunksize
       makeFilterTokens(file=file, pos=pos, dir=tk.dir, entities="both", project=project)
     }
   }
+  print("Next, run do.stopwords(), or skip ahead to do.model().")
 }
 
 ### Run this function to automate stopwords.
-# It is *very* time intensive.
-tk.make.stopwords <- function(project=tk.project){
+# It is time intensive.
+do.stopwords <- function(project=set.project){
   for (text in 1:nrow(tk.import)){
     textfile <- paste(text,".txt",sep="")
     makeFilterWords(project=project,file=textfile)
@@ -252,62 +246,60 @@ source("functions/lda.R")
 source("functions/import.R")
 
 ### Run this function to make a topic model of the texts
-tk.make.model <- function(project=tk.project,k=tk.k,pos=tk.pos) {
+do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T) {
   # Set data.dir to the directory with data.
   data.dir <- tk.dir
   # Ready the directory for word clouds
-  if (!file.exists(paste(tk.project,"plots",sep="/"))){
-    dir.create(paste(tk.project,"plots",sep="/"))
+  if (!file.exists(paste(set.project,"plots",sep="/"))){
+    dir.create(paste(set.project,"plots",sep="/"))
   }
   docs <- loadDocuments(data.dir)# from Audenaert's import.R
   # Compile words to the stop list from a few different places
-  if (file.exists(paste(tk.project,"entities",sep="/"))) {
-    for (file in list.files(paste(tk.project,"entities",sep="/"))) {
-      thisfile <- paste(tk.project,"entities",file,sep="/")
-      tk.stops <- c(tk.stops, readLines(thisfile))
+  if (file.exists(paste(set.project,"entities",sep="/"))) {
+    for (file in list.files(paste(set.project,"entities",sep="/"))) {
+      thisfile <- paste(set.project,"entities",file,sep="/")
+      set.stops <- c(set.stops, readLines(thisfile))
     }
   }
-  tk.stops <- c(tk.stops, readLines("stop-words/stop-words_english_2_en.txt"))
-  tk.stops <- unique(tk.stops)
-  fileConn <- file(paste(tk.project,"tk-stops.txt",sep="/"))
-  writeLines(tk.stops, fileConn)
+  set.stops <- c(set.stops, readLines("stop-words/stop-words_english_2_en.txt"))
+  set.stops <- unique(set.stops)
+  fileConn <- file(paste(set.project,"tk-stops.txt",sep="/"))
+  writeLines(set.stops, fileConn)
   close(fileConn)
-  stoplist <- paste(tk.project,"tk-stops.txt",sep="/")
-  # Train a document model with topics numbering as much as tk.k, ignoring stop words
+  stoplist <- paste(set.project,"tk-stops.txt",sep="/")
+  # Train a document model with topics numbering as much as set.k, ignoring stop words
   model <<- trainSimpleLDAModel(docs, k, stoplist=stoplist)# from Audenaert's example1.R which I've renamed to lda.R
   # Print wordclouds for easy visualization.
-  print("printing topic word clouds")
-  plotTopicWordcloud(model, verbose=T, output=paste(tk.project,"plots",sep="/"))
-}
-
-
-### Run this funcion to present results in a useful format
-tk.make.analysis <- function(project=tk.project){
+  if (wordclouds==T) {
+    print("printing topic word clouds")
+    plotTopicWordcloud(model, verbose=T, output=paste(set.project,"plots",sep="/"))
+  }
+  print("preparing results for analysis")
   # Get and clean up the ids and add them alongside the topics
   library(plyr)
-  tk.ids <- gsub("^n|-.*$","", model$documents[,1])
-  tk.ids <- type.convert(tk.ids,numerals="no.loss")
-  tk.import <- cbind(id=1:nrow(tk.import),tk.import[,4:ncol(tk.import)])
-  tk.topics <- cbind(tk.ids, model$docAssignments)
+  tk.ids <<- gsub("^n|-.*$","", model$documents[,1])
+  tk.ids <<- type.convert(tk.ids,numerals="no.loss")
+  tk.import.analysis <- cbind(id=1:nrow(tk.import),tk.import[,4:ncol(tk.import)])
+  tk.topics <<- cbind(tk.ids, model$docAssignments)
   # Recombine all the chunks for each id by averaging the scores
-  mode(tk.topics) <- "numeric"
-  tk.topics <- ddply(as.data.frame(tk.topics),.(tk.ids),numcolwise(mean))
-  colnames(tk.topics)[2:ncol(tk.topics)] <- paste("Topic", 1:model$K, sep=" ")
+  mode(tk.topics) <<- "numeric"
+  tk.topics <<- ddply(as.data.frame(tk.topics),.(tk.ids),numcolwise(mean))
+  colnames(tk.topics)[2:ncol(tk.topics)] <<- paste("Topic", 1:model$K, sep=" ")
   # Calculate number of significant topics per document, using average median score of topics as a threshold
   tk.averagetopicmedian <- mean(apply(tk.topics[,2:ncol(tk.topics)],1,median))
   tk.topicsabovethreshold <- rowSums(tk.topics[,2:ncol(tk.topics)] > tk.averagetopicmedian)
-  tk.topics <- cbind(id=tk.topics[,1], topic.count = tk.topicsabovethreshold, tk.topics[,2:ncol(tk.topics)])
-  rm(tk.topicsabovethreshold,tk.ids)
+  tk.topics <<- cbind(id=tk.topics[,1], topic.count = tk.topicsabovethreshold, tk.topics[,2:ncol(tk.topics)])
+  # rm(tk.topicsabovethreshold,tk.ids)
   # Add data from the import CSV
-  tk.topics <- merge(tk.import, tk.topics)
-  t.start <- ncol(tk.import)+2
-  t.end <- ncol(tk.topics)
+  tk.topics <<- merge(tk.import.analysis, tk.topics)
+  t.start <<- ncol(tk.import.analysis)+2
+  t.end <<- ncol(tk.topics)
   # Add useful labels to the topics.
   tk.topwords <<- c()
-  for (topic in 1:tk.k) {
-    tk.topwords[topic] <<- paste(names(model$getTopic(topic)$getWords(4)), collapse=", ")
+  for (topic in 1:set.k) {
+    tk.topwords[topic] <<- paste(names(model$getTopic(topic)$getWords(5)), collapse=", ")
   }
-  attr(tk.topics, "variable.labels")[t.start:t.end] <- tk.topwords
+  attr(tk.topics, "variable.labels")[t.start:t.end] <<- tk.topwords
   # Add filtered views for each additional column, and export to CSV.
   tk.topics.by <<- list()
   tk.dist <<- list()
@@ -321,7 +313,7 @@ tk.make.analysis <- function(project=tk.project){
     tempdata <- t(tempdata)
     colnames(tempdata) <- tempnames
     rownames(tempdata) <- paste(gsub("Topic ", "", rownames(tempdata)), tk.topwords, sep=". ")
-    write.csv(tempdata,file=paste(tk.project,"/topics-by-",factorname,".csv",sep=""))
+    write.csv(tempdata,file=paste(set.project,"/topics-by-",factorname,".csv",sep=""))
     # Add a special visualization for binary factors.
     if (nrow(tk.topics.by[[factorname]])==2) {
       library(reshape2)
@@ -331,7 +323,7 @@ tk.make.analysis <- function(project=tk.project){
       melted [,2] <<- paste(gsub("Topic ", "", melted[,2]), tk.topwords[as.numeric(gsub("Topic ", "", melted[,2]))], sep=". ")
       melted <<- melted[order(melted[[factorname]],melted$Topic),]
       topicavg <<- c()
-      for (row in 1:tk.k) {topicavg[row] <<- melted[row,3]-melted[row+tk.k,3]}
+      for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
       topicavg <<- c(topicavg,topicavg)
       melted <<- cbind(melted,topicavg)
       library(ggplot2)
@@ -344,7 +336,7 @@ tk.make.analysis <- function(project=tk.project){
       dist <- dist + geom_point(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), mapping=aes(y=topicavg), shape=4, show.legend = F)
       tk.dist[[factorname]] <<- dist
       print(dist)
-      pdf(paste(tk.project,"/distribution-", factorname, ".pdf", sep=""))
+      pdf(paste(set.project,"/distribution-", factorname, ".pdf", sep=""))
       print(dist)
       dev.off()
       # rm(melted,topicavg,topicnames)
@@ -352,48 +344,63 @@ tk.make.analysis <- function(project=tk.project){
     rm(factorname,tempdata)
   }
   # Export a master CSV file for analysis.
-  write.csv(tk.topics, file=paste(tk.project,"/topics",paste(tk.pos,collapse="-"),".csv",sep=""))
+  write.csv(tk.topics, file=paste(set.project,"/topics",paste(set.pos,collapse="-"),".csv",sep=""))
   View(tk.topics)
+  print("Next, run do.comparison(). Be sure to specify what you would like to compare, in the following format: do.comparison('sex','f','m').")
 }
 
 
 ### Run this function to look more closely at particular factors.
 # With the sample import.csv, try some of the following:
-# tk.make.distribution("sex","f","m")
-# tk.make.distribution("nationality","american","british")
+# do.comparison("sex","f","m")
+# do.comparison("nationality","american","british")
 #
 # Note that omitting the third argument compares against the average of the whole corpus:
-# tk.make.distribution("title","Tender Buttons")
-tk.make.distribution <- function(factorname,compare,compare2="average",project=tk.project){
+# do.comparison("title","Tender Buttons")
+do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep=""),limit=set.k,project=set.project){
   library(reshape2)
-  average <<- t(data.frame(colMeans(tk.topics.by[[factorname]][2:ncol(tk.topics.by[[factorname]])])))
-  average <<- cbind(factorname = "average",average)
-  colnames(average)[1] <<- factorname
-  rownames(average) <<- NULL
+  otheraverage <<- t(data.frame(colMeans(subset(tk.topics.by[[factorname]][2:ncol(tk.topics.by[[factorname]])]), factorname!=compare)))
+  otheraverage <<- cbind(factorname = paste("not ",compare,sep=""),otheraverage)
+  colnames(otheraverage)[1] <<- factorname
+  rownames(otheraverage) <<- NULL
   fac.dist <<- tk.topics.by[[factorname]]
-  fac.dist <<- rbind(fac.dist,average)
+  fac.dist <<- rbind(fac.dist,otheraverage)
   topicnames <<- colnames(fac.dist[,2:ncol(fac.dist)])
-  melted <<- melt(fac.dist, id.vars = factorname, measure.vars=topicnames)
+  melted <<- suppressWarnings(melt(fac.dist, id.vars = factorname, measure.vars=topicnames))
   melted <<- subset(melted,melted[,1] %in% c(compare, compare2))
   colnames(melted) <<- c(factorname, "Topic", "Distribution")
   melted[,2] <<- paste(gsub("Topic ", "", melted[,2]), tk.topwords[as.numeric(gsub("Topic ", "", melted[,2]))], sep=". ")
-  melted[,3] <<- sapply(melted[,3], function(x) as.numeric(levels(x))[x])
-  tosort <- c(compare,compare2)
+  melted[,3] <<- sapply(melted[,3], as.numeric)
+  tosort <<- c(compare,compare2)
   melted <<- melted[order(match(melted[[factorname]],tosort),melted$Topic),]
   topicavg <<- c()
-  for (row in 1:tk.k) {topicavg[row] <<- melted[row,3]-melted[row+tk.k,3]}
+  for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
   topicavg <<- c(topicavg,topicavg)
+  variancemean <<- paste(round(mean(abs(topicavg))*100,digits=2),"%",sep="")
+  variancemax <<- paste(round(max(abs(topicavg))*100,digits=2),"%",sep="")
   melted <<- cbind(melted,topicavg)
+  melted <<- melted[order(-topicavg),]
+  limiter <<- limit*2
+  topicnums <<- set.k*2
+  bottomlimit <<- topicnums-limiter+1
+  supermelted <<- melted[c(1:limiter),]
+  submelted <<- melted[c(bottomlimit:topicnums),]
+  glacier <<- rbind(supermelted,submelted)
   library(ggplot2)
-  dist <- ggplot(data=melted, aes_q(x=substitute(reorder(Topic, topicavg)), y=quote(Distribution), fill=as.name(factorname)))
-  dist <- dist + geom_bar(data=subset(melted,melted[,1]==compare), stat="identity")
-  dist <- dist + geom_bar(data=subset(melted,melted[,1]==compare2), stat="identity", position="identity", mapping=aes(y=-Distribution))
+  dist <- ggplot(data=glacier, aes_q(x=substitute(reorder(Topic, topicavg)), y=quote(Distribution), fill=as.name(factorname)))
+  dist <- dist + geom_bar(data=subset(glacier,glacier[,1]==compare), stat="identity")
+  dist <- dist + geom_bar(data=subset(glacier,glacier[,1]==compare2), stat="identity", position="identity", mapping=aes(y=-Distribution))
   dist <- dist + scale_y_continuous(labels=abs)
-  dist <- dist + xlab("Topics") + scale_fill_discrete(breaks = c(compare,compare2))
+  dist <- dist + xlab("Topics") + ylab(paste("Average variance: ", variancemean, "; Max variance: ", variancemax, sep="")) + scale_fill_discrete(breaks = c(compare,compare2))
   dist <- dist + coord_flip()
-  dist <- dist + geom_point(data=subset(melted,melted[,1]==compare2), mapping=aes(y=topicavg), shape=4, show.legend = F)
+  dist <- dist + geom_point(data=subset(glacier,glacier[,1]==compare2), mapping=aes(y=topicavg), shape=4, show.legend = F)
   print(dist)
+  pdf(paste(set.project,"/", compare, " vs ", compare2, ".pdf", sep=""))
+  print(dist)
+  dev.off()
 }
+
+print("To get started, run do.preparation().")
 
 # Acknowledgments (to be added to a NOTICES file)
 # conversion of HTML to text adapted from Tony Breyal
