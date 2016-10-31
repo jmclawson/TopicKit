@@ -43,3 +43,9 @@ After the first run of `do.preparation()`, **TopicKit.R** will save files and wi
 1. Erase **\texts** directory to download texts.
 2. Erase **\txt** directory to divide the text into chunks.
 3. Erase directory beginning with **\txt-** to repeat the extraction of a given element.
+
+## Troubleshooting
+Since it works with many packages at once, TopicKit will occasionally run into a snag. Try restarting R to see if a second go works better. If it doesn't, your error may be one of the following with known solutions:
+
+* `input string 1 is invalid in this locale`
+  > In the terminal, enter `Sys.setlocale('LC_ALL','C')` and then try again.
