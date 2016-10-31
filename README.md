@@ -36,17 +36,21 @@ By default, TopicKit will work with a CSV file called **import.csv** to create a
 Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `set.chunksize` in the terminal window. Next, it strips out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
 > `set.pos <- c("NN", "NNS", "JJ")`
 
-Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. But we need to start somewhere. With the `set.k` variable, TopicKit sets a default of 50 topics. You can change this default in the terminal window before running `do.model()`.
+Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. Since we need to start somewhere, TopicKit sets a default of 50 topics with the `set.k` variable, which you can modify before running `do.model()`.
 
 ## After the first run
-After the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
+With the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
-1. Erase **\texts** directory to download texts.
-2. Erase **\txt** directory to divide the text into chunks.
-3. Erase directory beginning with **\txt-** to repeat the extraction of a given element.
+1. Erase the **\texts** directory to download texts once again.
+2. Erase the **\txt** directory to divide the text into chunks.
+3. Erase the directory beginning with **\txt-** to repeat the extraction of a given element.
+
+Each of these steps is currently necessary if you modify the CSV file after a first run. In fact, it might be easiest just to delete the project directory altogether, since these three directories are held within it. 
+
+Future updates to TopicKit might try to be smarter at adding data if you add rows to a spreadsheet, but that feature is not yet in the workflow.
 
 ## Troubleshooting
-Since it works with many packages at once, TopicKit will occasionally run into a snag. Try restarting R to see if a second go works better. If it doesn't, your error may be one of the following with known solutions:
+TopicKit works with many packages at once, so it's inevitable that it will eventually hit a snag. If you get an error that doesn't make sense at first, try restarting R to see if a second go works better. If restarting R and re-running each of the functions in order—`do.preparation()` followed by `do.model()`—still leads to error, your problem may be one with a known solution:
 
 * `input string 1 is invalid in this locale`
 
