@@ -22,13 +22,13 @@ Optionally, to automate creation of stopwords, which will take a long time, run 
 
 To derive a topic model, run `do.model()`. The script will attempt to model the topics in all the texts and create word clouds using scripts slightly modified from Neal Audenaert's work. Next, it will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
 
-To plot comparative graphs of the distribution of topics, run `do.comparison()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against, while the `limit` argument focuses the chart on a subset of data when the number of topics is great. Finally, use the project=... argument to specify your project. Typical uses of this function include the following:
+To plot comparative graphs of the distribution of topics, run `do.comparison()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against, while the `limit` argument focuses the chart on a subset of most-relevant data when the number of topics is too high. Finally, use the `project=...` argument to specify your project. Typical uses of this function include the following:
 
 - `do.comparison("sex", "f")`
 - `do.comparison("sex", "f", "m")`
 - `do.comparison("genre", "comedy", project="shakespeare")`
 - `do.comparison("genre", "tragedy", "history", project="shakespeare")`
-- `do.comparison("genre", "tragedy", "history", project="shakespeare", limit=20)`
+- `do.comparison("genre", "tragedy", "history", limit=20, project="shakespeare")`
 
 ## Under the Hood (or, Assumptions and Defaults)
 By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To switch to a different project, redefine `set.project` in the terminal window to point to a different CSV file: `set.project <- "shakespeare"`. All work in a project will be saved in a subfolder called by that project name.
