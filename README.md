@@ -21,12 +21,27 @@ By default, the variable `set.pos` tells the script to focus only on singular co
 Finally, set the number of topics you'd like to discover by redefining `set.k` at the beginning of the file. 
 
 ## Another way to change settings
+To analyze results, run `tk.make.analysis()`. The script will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
+
+To plot comparative graphs of the distribution of topics, run `tk.make.distribution()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against. Finally, use the `project=...` argument to specify your project. Typical uses of this function include the following:
+- `tk.make.distribution("sex","f")`
+- `tk.make.distribution("sex","f","m")`
+- `tk.make.distribution("sex","f","m",project="Woolf")`
+
+## Optional Arguments
 When calling functions, you can use settings that are different from the defaults using optional arguments:
 
 1. To modify defaults when collecting and preparing texts, use the optional `project`, `pos`, and `chunksize` arguments: `do.preparation(project="Woolf", pos=c("NN", "JJ"), chunksize=1500)`
 2. To specify project for discovering stopwords, use the optional `project` argument: `do.stopwords(project="Woolf")`
 3. To modify defaults when running the topic model, use the optional `project`, `k`, and `pos` arguments: `do.model(project="Woolf",k=90,pos="")` (Keep in mind that the scripts can only model texts that have been prepared using the same `pos` argument in steps 1 and 3.)
 4. To limit comparison to the most dissimilar topics, add the `limit` argument: `do.comparison("sex","f",limit="5")`
+
+## Under the Hood (or, Assumptions and Defaults)
+By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To specify another project as default, modify `tk.project` to point to to another CSV file. All work in a project will be saved in a subfolder called by that project name.
+
+Following best practices (*citation to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `tk.chunksize` at the beginning of **TopicKit.R**. Next, it strips out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, redefine the default at the beginning of **TopicKit.R** using the following line: `tk.pos <- c("NN", "NNS", "JJ")`
+
+Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. But we need to start somewhere. With the `tk.k` variable, TopicKit sets a default of 45 topics. You can change this default in your own installation or use the optional `k` argument in `tk.make.model()`.
 
 ## After the first run
 After the first run of `do.preparation`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
