@@ -33,10 +33,16 @@ To plot comparative graphs of the distribution of topics, run `do.comparison()`.
 ## Under the Hood (or, Assumptions and Defaults)
 By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To switch to a different project, redefine `set.project` in the terminal window to point to a different CSV file: `set.project <- "shakespeare"`. All work in a project will be saved in a subfolder called by that project name.
 
-Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `set.chunksize` in the terminal window. Next, it strips out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
+Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `set.chunksize` in the terminal window. Next, it attempts to strip out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
 > `set.pos <- c("NN", "NNS", "JJ")`
 
 Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. Since we need to start somewhere, TopicKit sets a default of 50 topics with the `set.k` variable, which you can modify before running `do.model()`.
+
+Even after selecting only for common nouns (with `do.preparation()`) and searching for named entities (with `do.stopwords()`), some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list:
+> `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "bertram")
+
+Unfortunately, these names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those names you find. To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses (omitting quotation marks):
+> `set.stops <- c(set.stops, "bertram")
 
 ## After the first run
 With the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
