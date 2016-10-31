@@ -39,10 +39,10 @@ Following best practices (*citations to come*), TopicKit will prepare data befor
 Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. Since we need to start somewhere, TopicKit sets a default of 50 topics with the `set.k` variable, which you can modify before running `do.model()`.
 
 Even after selecting only for common nouns (with `do.preparation()`) and searching for named entities (with `do.stopwords()`), some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list. These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find:
-> `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "bertram")
+>  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "bertram")`
 
 To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
-> `set.stops <- c(set.stops, "bertram")
+> `set.stops <- c(set.stops, "bertram")`
 
 ## After the first run
 With the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
