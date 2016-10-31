@@ -48,4 +48,5 @@ After the first run of `do.preparation()`, **TopicKit.R** will save files and wi
 Since it works with many packages at once, TopicKit will occasionally run into a snag. Try restarting R to see if a second go works better. If it doesn't, your error may be one of the following with known solutions:
 
 * `input string 1 is invalid in this locale`
+
   > In the terminal, enter `Sys.setlocale('LC_ALL','C')` and then try again.
