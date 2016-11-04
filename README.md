@@ -50,8 +50,8 @@ Additionally, TopicKit will create word clouds in the project's **plots/** subdi
 
 This image demonstrates what we might already have expected, that histories more than comedies are concerned with *royalty* (here, topic 29) and *battle* (topic 50) and something that looks like *succession* (topic 12). Conversely, comedies are best recognized from histories for their concern with the establishing of a *househould* (topic 9), with something that looks like *individual existential anxiety* (topic 41), and with *domestic relationships* (topic 49). The measures of average variance and max variance at the bottom of the chart allow for comparison among different columns of metadata, even if only to say that some divisions are better demonstrated than others in the topic model. And we can recognize this variance most easily by looking at the word clouds plotted for the most extreme two topics:
 
-![Topic 9 is strong in comedies.](http://jmclawson.com/topickit/topic-9.png "Topic 9 is strong in comedies.")
-![Topic 29 is strong in histories.](http://jmclawson.com/topickit/topic-29.png "Topic 29 is strong in histories.")
+![Wordcloud showing prominence of words "sir," "master," "house," "fellow"](http://jmclawson.com/topickit/topic-9.png "Topic 9 is strong in comedies.")
+![Wordcloud showing prominence of words "king," "crown," "head," "queen"](http://jmclawson.com/topickit/topic-29.png "Topic 29 is strong in histories.")
 
 These word clouds suggest that the biggest topical difference between Shakespeare's comedies and his histories might be a marker of class, since both are concerned with public markers of having "made it"—whether this marker be a title or something physical like a house or a crown.
 
