@@ -21,21 +21,8 @@ These steps need only to be run once for each machine.
 7. In the terminal pane, load `TopicKit.R` with the following command: `source("TopicKit.R")`.
 8. Follow the directions in the terminal window.
 
-## Preparing a Project
-A sample **import.csv** is included. Either modify that file as a start, or create your own, following these steps:
-
-1. Create a spreadsheet with three or more columns and with one row per text.
-2. In the first row, define the column headers. The first column should be for the URL, the second should be for the opening line, and the third should be for the final line. Any additional columns are optional, but they will all be used by TopicKit. Good ideas include title, author, author sex, author nationality, genre, year of publication, etc. TopicKit will automate additional visualizations for columns with binary options, like "male" and "female", so consider how you might incorporate this kind of information.
-3. Devote each subsequent row to one text. In the first column, put a URL for that row's text.
-4. Into the second column, copy and paste the first line of the text to be modeled. (It isn't necessary to copy the entire line, just a string of unique-enough words to bypass what comes before it.) Alternatively, include a line number for this first line. Web pages and text files often include headers with unnecessary information, and we want to ignore the irrelevant stuff.
-5. Into the third column, copy and paste the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number or (as a negative number) the number of lines from the bottom.
-6. Add data in additional columns for each text.
-7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
-
 ## Using TopicKit
-Set the working directory and load TopicKit.R with `source('TopicKit.R')`. Before beginning, make sure to define the project you'll be working on. Run `set.project` to see which project is currently set; the default is `"import"`, but you can change it to something like `"shakespeare"` using the following command: `set.project <- "shakespeare"`. 
-
-To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
 
 Optionally, to automate creation of stopwords, which may take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
 
@@ -45,13 +32,30 @@ To plot comparative graphs of the distribution of topics, run `do.comparison()`.
 
 - `do.comparison("sex", "f")`
 - `do.comparison("sex", "f", "m")`
-- `do.comparison("genre", "comedy")`
-- `do.comparison("genre", "tragedy", "history")`
-- `do.comparison("genre", "tragedy", "history", limit=20)`
+- `do.comparison("sex", "f", "m", limit=20)`
+
+## Working with Projects
+By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import".
+Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below. All work in a project will be saved in a subfolder called by that project name.
+
+Working with a project allows for many useful visualizations of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically form columns in the initial spreadsheet:
+- **topics-by-dynasty.csv**
+- **topics-by-genre.csv**
+- **topics-by-title.csv**
+- **topics-by-year.csv**
+
+Additionally, TopicKit will create word clouds in the project's **plots/** subdirectory, and it will automate a topic comparison for any column containing only two variables. For the Shakespeare project, TopicKit will create the **[Stuart vs Tudor.pdf](http://jmclawson.com/topickit/Stuart-vs-Tudor.pdf)**. Beyond any automatic comparison, you can force additional comparisons using the `do.comparison()` function, identifying the column you'd like to consider, and specifying the parameter or parameters to compare. For example, `do.comparison("title", "Julius Caesar")` will produce a [graphic demonstrating the topics most closely associated with and against the play *Julius Caesar*](http://jmclawson.com/topickit/Julius-Caesar-vs-not-Julius-Caesar.pdf), while `do.comparison("genre", "comedy", "history")` [scales topics by their affinity to the genre "comedy" against that of "history"](http://jmclawson.com/topickit/comedy-vs-history.pdf). To look more closely at a subset of a large number of topics, we might limit the scale by the top and bottom five topics using `do.comparison("genre", "comedy", "history", limit=5)`, the output of which is shown below:
+
+![Topics in Shakespeare's comedies differ significantly from those found in his histories.](http://jmclawson.com/topickit/comedy-vs-history.png "Topics in Shakespeare's comedies differ significantly from those found in his histories.")
+
+This image demonstrates what we might already have expected, that histories more than comedies are concerned with royalty (here, topic 29) and battle (topic 50) and something that looks like succession (topic 12). Conversely, comedies are best recognized from histories for their concern with the establishing of a househould (topic 9), with something that looks like individual existential anxiety (topic 41), and with domestic relationships (topic 49). The measures of average variance and max variance at the bottom of the chart allow for comparison among different columns of metadata, even if only to say that some divisions are better demonstrated than others in the topic model. And we can recognize this variance most easily by looking at the word clouds plotted for the most extreme two topics:
+
+![Topic 9 is strong in comedies.](http://jmclawson.com/topickit/topic-9.png "Topic 9 is strong in comedies.")
+![Topic 29 is strong in histories.](http://jmclawson.com/topickit/topic-29.png "Topic 29 is strong in histories.")
+
+These word clouds suggest that the biggest topical difference between Shakespeare's comedies and his histories might be a marker of class, since both are concerned with public markers of having "made it"—whether this marker be a title or something physical like a house or a crown.
 
 ## Under the Hood (or, Assumptions and Defaults)
-By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To switch to a different project, redefine `set.project` in the terminal window to point to a different CSV file: `set.project <- "shakespeare"`. All work in a project will be saved in a subfolder called by that project name.
-
 Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `set.chunksize` in the terminal window. Next, it attempts to strip out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
 > `set.pos <- c("NN", "NNS", "JJ")`
 
@@ -62,6 +66,17 @@ Even after selecting only for common nouns (with `do.preparation()`) and searchi
 
 To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
 > `set.stops <- c(set.stops, "bertram")`
+
+## Preparing a Project
+A sample **import.csv** is included. Either modify that file as a start, or create your own, following these steps:
+
+1. Create a spreadsheet with three or more columns and with one row per text.
+2. In the first row, define the column headers. The first column should be for the URL, the second should be for the opening line, and the third should be for the final line. Any additional columns are optional, but they will all be used by TopicKit. Good ideas include title, author, author sex, author nationality, genre, year of publication, etc. TopicKit will automate additional visualizations for columns with binary options, like "male" and "female", so consider how you might incorporate this kind of information.
+3. Devote each subsequent row to one text. In the first column, put a URL for that row's text.
+4. Into the second column, copy and paste the first line of the text to be modeled. (It isn't necessary to copy the entire line, just a string of unique-enough words to bypass what comes before it.) Alternatively, include a line number for this first line. Web pages and text files often include headers with unnecessary information, and we want to ignore the irrelevant stuff.
+5. Into the third column, copy and paste the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number or (as a negative number) the number of lines from the bottom.
+6. Add data in additional columns for each text.
+7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
 ## After the First Run
 With the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
