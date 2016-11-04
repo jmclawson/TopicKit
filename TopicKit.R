@@ -41,6 +41,7 @@ if(!require("reshape2"))
 # future variable: download only x texts
 makeLocalCopy <- function(url, number, project=set.project) {
   tk.type <- sapply(strsplit(url, split="\\."), tail, 1L)
+  if (grep("/",tk.type)>0) tk.type <- "html"
   # Be kind to Gutenberg by using its mirrors
   urlsplit <- strsplit(url, split="/")[[1]]
   if (length(grep("gutenberg.org",urlsplit))==1) {
@@ -66,8 +67,11 @@ makeLocalCopy <- function(url, number, project=set.project) {
   if (!tk.type=="txt") {
     library(XML)
     char.vec <- paste(readLines(tk.thisfilename.type, warn = FALSE), collapse=" ")
-    doc <- htmlTreeParse(char.vec, useInternalNodes = T)
-    text <- unlist(xpathApply(doc, "//p", xmlValue))
+    # doc <- htmlTreeParse(char.vec, useInternalNodes = T)
+    # text <- unlist(xpathApply(doc, "//p", xmlValue))
+    doc <- htmlParse(char.vec, asText = T)
+    text <- xpathSApply(doc, "//text()[not(ancestor::script)][not(ancestor::style)][not(ancestor::noscript)][not(ancestor::form)]", xmlValue)
+    # toggle above
     txt <- paste(text, collapse="\n")
     write(txt,file=paste(tk.thisfilename, "txt", sep=""),append=FALSE,sep="")
   }
@@ -316,31 +320,33 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T) {
     write.csv(tempdata,file=paste(set.project,"/topics-by-",factorname,".csv",sep=""))
     # Add a special visualization for binary factors.
     if (nrow(tk.topics.by[[factorname]])==2) {
-      library(reshape2)
-      topicnames <<- colnames(tk.topics.by[[factorname]][,2:ncol(tk.topics.by[[factorname]])])
-      melted <<- melt(tk.topics.by[[factorname]], id.vars = factorname, measure.vars=topicnames)
-      colnames(melted) <<- c(factorname, "Topic", "Distribution")
-      melted [,2] <<- paste(gsub("Topic ", "", melted[,2]), tk.topwords[as.numeric(gsub("Topic ", "", melted[,2]))], sep=". ")
-      melted <<- melted[order(melted[[factorname]],melted$Topic),]
-      topicavg <<- c()
-      for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
-      topicavg <<- c(topicavg,topicavg)
-      melted <<- cbind(melted,topicavg)
-      library(ggplot2)
-      dist <- ggplot(data=melted, aes_q(x=substitute(reorder(Topic, topicavg)), y=quote(Distribution), fill=as.name(factorname)))
-      dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][1,1]), stat="identity")
-      dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), stat="identity", position="identity", mapping=aes(y=-Distribution))
-      dist <- dist + scale_y_continuous(labels=abs)
-      dist <- dist + xlab("Topics")
-      dist <- dist + coord_flip()
-      dist <- dist + geom_point(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), mapping=aes(y=topicavg), shape=4, show.legend = F)
-      tk.dist[[factorname]] <<- dist
-      print(dist)
-      pdf(paste(set.project,"/distribution-", factorname, ".pdf", sep=""))
-      print(dist)
-      dev.off()
-      # rm(melted,topicavg,topicnames)
+      do.comparison(factorname,tk.topics.by[[factorname]][1,1],tk.topics.by[[factorname]][2,1])
     }
+    #   library(reshape2)
+    #   topicnames <<- colnames(tk.topics.by[[factorname]][,2:ncol(tk.topics.by[[factorname]])])
+    #   melted <<- melt(tk.topics.by[[factorname]], id.vars = factorname, measure.vars=topicnames)
+    #   colnames(melted) <<- c(factorname, "Topic", "Distribution")
+    #   melted [,2] <<- paste(gsub("Topic ", "", melted[,2]), tk.topwords[as.numeric(gsub("Topic ", "", melted[,2]))], sep=". ")
+    #   melted <<- melted[order(melted[[factorname]],melted$Topic),]
+    #   topicavg <<- c()
+    #   for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
+    #   topicavg <<- c(topicavg,topicavg)
+    #   melted <<- cbind(melted,topicavg)
+    #   library(ggplot2)
+    #   dist <- ggplot(data=melted, aes_q(x=substitute(reorder(Topic, topicavg)), y=quote(Distribution), fill=as.name(factorname)))
+    #   dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][1,1]), stat="identity")
+    #   dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), stat="identity", position="identity", mapping=aes(y=-Distribution))
+    #   dist <- dist + scale_y_continuous(labels=abs)
+    #   dist <- dist + xlab("Topics")
+    #   dist <- dist + coord_flip()
+    #   dist <- dist + geom_point(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), mapping=aes(y=topicavg), shape=4, show.legend = F)
+    #   tk.dist[[factorname]] <<- dist
+    #   print(dist)
+    #   pdf(paste(set.project,"/distribution-", factorname, ".pdf", sep=""))
+    #   print(dist)
+    #   dev.off()
+    #   # rm(melted,topicavg,topicnames)
+    # }
     rm(factorname,tempdata)
   }
   # Export a master CSV file for analysis.
