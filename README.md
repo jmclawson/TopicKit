@@ -4,7 +4,7 @@ A basic interface for planning, fetching, topic modeling, and analyzing a corpus
 ## Installation
 These steps need only to be run once for each machine.
 
-### Set up a working environment
+### Setting up a working environment
 1. [Install R] (https://cran.r-project.org)
   > R is the language TopicKit is written in. Installing it allows you to work with TopicKit and other tools like it.
   
@@ -14,7 +14,7 @@ These steps need only to be run once for each machine.
 3. [Install RStudio] (https://www.rstudio.com/products/rstudio/download/)
   > This step is optional, but RStudio is just so good that you might as well get it. What's more, it simplifies the process of working with R.
 
-### Work with TopicKit
+### Setting up TopicKit
 4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
 5. Add the CSV file for your project into this same directory, or choose one of the sample data sets. (See below for more on project spreadsheets.)
 6. In RStudio, set your working directory to the folder containing TopicKit, e.g., `setwd("~/Documents/TopicKit")`.
