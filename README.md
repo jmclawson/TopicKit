@@ -2,9 +2,14 @@
 A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit automates many steps for data munging, and it applies best topic modeling practices by default, allowing for quick testing of hypotheses and for replicability in collaborative projects.
 
 ## Installation
+These steps need only to be run once for each machine.
+
+### Set up a working environment
 1. [Install R] (https://cran.r-project.org)
 2. [Install Java] (https://www.java.com/en/download/)
 3. [Install R Studio] (https://www.rstudio.com/products/rstudio/download/) (This step is optional, but R Studio is just so good that you might as well get it. Plus it makes working with R easier to handle.)
+
+### Work with TopicKit
 4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
 5. Add the CSV file for your project into this same directory, or choose one of the sample data sets. (See below for more on project spreadsheets.)
 6. In RStudio, set your working directory to the folder containing TopicKit, e.g., `setwd("~/Documents/TopicKit")`.
