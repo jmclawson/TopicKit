@@ -7,9 +7,9 @@ These steps need only to be run once for each machine.
 ### Set up a working environment
 1. [Install R] (https://cran.r-project.org)
 2. [Install Java] (https://www.java.com/en/download/)
-3. [Install R Studio] (https://www.rstudio.com/products/rstudio/download/) (This step is optional, but R Studio is just so good that you might as well get it. Plus it makes working with R easier to handle.)
+3. [Install RStudio] (https://www.rstudio.com/products/rstudio/download/) (This step is optional, but RStudio is just so good that you might as well get it. Plus it makes working with R easier to handle.)
 
-### Work with TopicKit
+### Work with Topic
 4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
 5. Add the CSV file for your project into this same directory, or choose one of the sample data sets. (See below for more on project spreadsheets.)
 6. In RStudio, set your working directory to the folder containing TopicKit, e.g., `setwd("~/Documents/TopicKit")`.
