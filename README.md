@@ -2,7 +2,14 @@
 A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit automates many steps for data munging, and it applies best topic modeling practices by default, allowing for quick testing of hypotheses and for replicability in collaborative projects.
 
 ## Installation
-*(here I need to talk about how to install R, how to install Java, etc.)*
+1. [Install R] (https://cran.r-project.org)
+2. [Install Java] (https://www.java.com/en/download/)
+3. [Install R Studio] (https://www.rstudio.com/products/rstudio/download/) (This step is optional, but R Studio is just so good that you might as well get it. Plus it makes working with R easier to handle.)
+4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
+5. Add the CSV file for your project into this same directory, or choose one of the sample data sets. (See below for more on project spreadsheets.)
+6. In RStudio, set your working directory to the folder containing TopicKit, e.g., `setwd("~/Documents/TopicKit")`.
+7. In the terminal pane, load `TopicKit.R` with the following command: `source("TopicKit.R")`.
+8. Follow the directions in the terminal window.
 
 ## Preparing a Project
 A sample **import.csv** is included. Either modify that file as a start, or create your own, following these steps:
@@ -13,22 +20,22 @@ A sample **import.csv** is included. Either modify that file as a start, or crea
 4. Into the second column, copy and paste the first line of the text to be modeled. (It isn't necessary to copy the entire line, just a string of unique-enough words to bypass what comes before it.) Alternatively, include a line number for this first line. Web pages and text files often include headers with unnecessary information, and we want to ignore the irrelevant stuff.
 5. Into the third column, copy and paste the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number or (as a negative number) the number of lines from the bottom.
 6. Add data in additional columns for each text.
-7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for import.csv by default. If instead you've named your file shakespeare.csv, make sure to add the argument project="shakespeare" when calling each function in the next section. (See more on these arguments in the section after that.)
+7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
 ## Using TopicKit
-Set the working directory and load TopicKit.R with `source('TopicKit.r')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
 
-Optionally, to automate creation of stopwords, which will take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
+Optionally, to automate creation of stopwords, which may take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
 
-To derive a topic model, run `do.model()`. The script will attempt to model the topics in all the texts and create word clouds using scripts slightly modified from Neal Audenaert's work. To skip making wordc clouds, which can take time, add the optional `wordclouds` argument inside parentheses: `do.model(wordclouds=FALSE)`.  After running the model, `do,model()` will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
+To derive a topic model, run `do.model()`. The script will attempt to model the topics in all the texts and create word clouds using scripts slightly modified from Neal Audenaert's work. To skip making word clouds, which can take time, add the optional `wordclouds` argument inside parentheses: `do.model(wordclouds=FALSE)`.  After running the model, TopicKit will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
 
-To plot comparative graphs of the distribution of topics, run `do.comparison()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against, while the `limit` argument focuses the chart on a subset of most-relevant data when the number of topics is too high. Finally, use the `project=...` argument to specify your project. Typical uses of this function include the following:
+To plot comparative graphs of the distribution of topics, run `do.comparison()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against, while the `limit` argument focuses the chart on a subset of most-relevant data when the number of topics is too high. Typical uses of this function include the following:
 
 - `do.comparison("sex", "f")`
 - `do.comparison("sex", "f", "m")`
-- `do.comparison("genre", "comedy", project="shakespeare")`
-- `do.comparison("genre", "tragedy", "history", project="shakespeare")`
-- `do.comparison("genre", "tragedy", "history", limit=20, project="shakespeare")`
+- `do.comparison("genre", "comedy")`
+- `do.comparison("genre", "tragedy", "history")`
+- `do.comparison("genre", "tragedy", "history", limit=20)`
 
 ## Under the Hood (or, Assumptions and Defaults)
 By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". To switch to a different project, redefine `set.project` in the terminal window to point to a different CSV file: `set.project <- "shakespeare"`. All work in a project will be saved in a subfolder called by that project name.
@@ -39,7 +46,7 @@ Following best practices (*citations to come*), TopicKit will prepare data befor
 Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. Since we need to start somewhere, TopicKit sets a default of 50 topics with the `set.k` variable, which you can modify before running `do.model()`.
 
 Even after selecting only for common nouns (with `do.preparation()`) and searching for named entities (with `do.stopwords()`), some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list. These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find:
->  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "bertram")`
+>  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia")`
 
 To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
 > `set.stops <- c(set.stops, "bertram")`
@@ -64,4 +71,8 @@ TopicKit works with many packages at once, so it's inevitable that it will event
   
 * `TEXT_SHOW_BACKTRACE environmental variable.`
 
-  > I've been ignoring this one and not noticed any problem, but I should probably figure it out.
+  > I've been ignoring this one and have not noticed any problem, but I will continue work to debug it.
+  
+* `In postDrawDetails(x) : reached elapsed time limit`
+
+  > I get this error intermittently, and each time seems to be for a seemingly random function in place of `postDrawDetails(x)` each time. I think it happens only after I've first overtaxed my system with a big data set. I haven't found any trouble ignoring it and running the function again.
