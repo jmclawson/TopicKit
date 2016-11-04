@@ -9,6 +9,8 @@ set.pos <- c("NN")
 set.k <- 50
 set.stops <- c()
 set.project <- "import"
+set.stability <- FALSE
+set.stability.seed <- 1
 
 # To run:
 # 1. load this file
@@ -250,7 +252,7 @@ source("functions/lda.R")
 source("functions/import.R")
 
 ### Run this function to make a topic model of the texts
-do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T) {
+do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stability=set.stability) {
   # Set data.dir to the directory with data.
   data.dir <- tk.dir
   # Ready the directory for word clouds
@@ -352,7 +354,8 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T) {
   # Export a master CSV file for analysis.
   write.csv(tk.topics, file=paste(set.project,"/topics",paste(set.pos,collapse="-"),".csv",sep=""))
   View(tk.topics)
-  print("Next, run do.comparison(). Be sure to specify what you would like to compare, in the following format: do.comparison('sex','f','m').")
+  message.last <- "Next, run do.comparison(). Be sure to specify what you would like to compare, in the following format: \n do.comparison(\"sex\",\"f\",\"m\")."
+  cat(message.last)
 }
 
 
@@ -406,7 +409,10 @@ do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep="
   dev.off()
 }
 
-print("To get started, run do.preparation().")
+message.1 <- "To start, set the name of your project before initializing preparation. If your project file is named \"shakespeare.csv\", for example, enter the following commands: \n set.project <- \"shakespeare\" \n do.preparation()"
+
+cat(message.1)
+
 
 # Acknowledgments (to be added to a NOTICES file)
 # conversion of HTML to text adapted from Tony Breyal
