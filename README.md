@@ -33,7 +33,9 @@ A sample **import.csv** is included. Either modify that file as a start, or crea
 7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
 ## Using TopicKit
-Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+Set the working directory and load TopicKit.R with `source('TopicKit.R')`. Before beginning, make sure to define the project you'll be working on. Run `set.project` to see which project is currently set; the default is `"import"`, but you can change it to something like `"shakespeare"` using the following command: `set.project <- "shakespeare"`. 
+
+To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
 
 Optionally, to automate creation of stopwords, which may take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
 
