@@ -46,7 +46,8 @@ Working with a project allows for many useful visualizations of the resulting da
 
 Additionally, TopicKit will create word clouds in the project's **plots/** subdirectory, and it will automate a topic comparison for any column containing only two variables. For the Shakespeare project, TopicKit will create the **[Stuart vs Tudor.pdf](http://jmclawson.com/topickit/Stuart-vs-Tudor.pdf)**. Beyond any automatic comparison, you can force additional comparisons using the `do.comparison()` function, identifying the column you'd like to consider, and specifying the parameter or parameters to compare. For example, `do.comparison("title", "Julius Caesar")` will produce a [graphic demonstrating the topics most closely associated with and against the play *Julius Caesar*](http://jmclawson.com/topickit/Julius-Caesar-vs-not-Julius-Caesar.pdf), while `do.comparison("genre", "comedy", "history")` [scales topics by their affinity to the genre "comedy" against that of "history"](http://jmclawson.com/topickit/comedy-vs-history.pdf). To look more closely at a subset of a large number of topics, we might limit the scale by the top and bottom five topics using `do.comparison("genre", "comedy", "history", limit=5)`, the output of which is shown below:
 
-<div style="float:center;">![chart contrasting top five topics for comedies and for histories](http://jmclawson.com/topickit/comedy-vs-history.png)
+<div style="float:center;">
+![chart contrasting top five topics for comedies and histories](http://jmclawson.com/topickit/comedy-vs-history.png)
 <small>Topics in Shakespeare's comedies differ significantly from those found in his histories.</small>
 </div>
 
