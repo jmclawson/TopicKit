@@ -6,8 +6,13 @@ These steps need only to be run once for each machine.
 
 ### Set up a working environment
 1. [Install R] (https://cran.r-project.org)
+  > R is the language TopicKit is written in. Installing it allows you to work with TopicKit and other tools like it.
+  
 2. [Install Java] (https://www.java.com/en/download/)
-3. [Install RStudio] (https://www.rstudio.com/products/rstudio/download/) (This step is optional, but RStudio is just so good that you might as well get it. Plus it makes working with R easier to handle.)
+  > TopicKit relies on Mallet to handle the back end of running the topic model, and Mallet relies on Java, so it's necessary to have it installed from the start.
+  
+3. [Install RStudio] (https://www.rstudio.com/products/rstudio/download/)
+  > This step is optional, but RStudio is just so good that you might as well get it. Plus it makes working with R easier to handle.
 
 ### Work with Topic
 4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
