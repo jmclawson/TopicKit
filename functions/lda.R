@@ -44,8 +44,10 @@ library(wordcloud)
 trainSimpleLDAModel <- function(documents,
                                 num.topics,
                                 stoplist = "data/stoplist.csv",
-                                token.regexp="\\p{L}[\\p{L}\\p{P}]+\\p{L}")
+                                token.regexp="\\p{L}[\\p{L}\\p{P}]+\\p{L}",
+                                stability = FALSE)# jmc: Unfortunately, I don't see that this works to set a seed for replicability.
 {
+  if (stability==T) {set.seed(set.stability.seed)}# jmc: Unfortunately, I don't see that this works.
   mallet.instances <- mallet.import(unlist(documents$id),
                                     unlist(documents$text),
                                     stoplist,
@@ -55,7 +57,9 @@ trainSimpleLDAModel <- function(documents,
   topic.model$loadDocuments(mallet.instances)
   vocabulary <- topic.model$getVocabulary()
   word.freqs <- mallet.word.freqs(topic.model)
-  topic.model$train(1000)
+  if (stability==T) {topic.model$model$setRandomSeed(as.integer(set.stability.seed))}# jmc: Unfortunately, I don't see that this works.
+  topic.model$train(800)
+  topic.model$maximize(20)
 
   # construct result 
   # Note that all of this information can be easily retrieved via the trained 
