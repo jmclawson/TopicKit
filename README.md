@@ -58,7 +58,7 @@ This image demonstrates what we might already have expected, that histories more
 ![Wordcloud showing prominence of words "sir," "master," "house," "fellow"](http://jmclawson.com/topickit/topic-9.png "Topic 9 is strong in comedies.")
 ![Wordcloud showing prominence of words "king," "crown," "head," "queen"](http://jmclawson.com/topickit/topic-29.png "Topic 29 is strong in histories.")
 
-These word clouds suggest that the biggest topical difference between Shakespeare's comedies and his histories might be a marker of class, since both are concerned with public markers of having "made it"—whether this marker be something of reputation like a title or something physical like a house or crown.
+These word clouds suggest that the biggest topical difference between Shakespeare's comedies and his histories might be a marker of class, since both are concerned with public markers of having "made it"—whether this marker be something of reputation like a title or something physical like a house or crown. Notably, these topics also suggest that, while her role is yet diminished from that of her husband, a woman might play a bigger role in a history than in a comedy.
 
 Keep in mind that the probabilistic workings of the topic model will make results differ from one run of the model to the next. In the future, TopicKit will add a setting to trigger stability of results across a number of runs.
 
