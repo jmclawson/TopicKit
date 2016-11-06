@@ -35,11 +35,10 @@ To plot comparative graphs of the distribution of topics, run `do.comparison()`.
 - `do.comparison("sex", "f", "m", limit=20)`
 
 ## Working with Projects
-By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import".
-Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below. All work in a project will be saved in a subfolder called by that project name.
+By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below. All work in a project will be saved in a subfolder called by that project name.
 
 ### Exporting data
-Working with a project will automatically export different views of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
+After running the project model, TopicKit will automatically export different views of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
 - **topics-by-dynasty.csv**
 - **topics-by-genre.csv**
 - **topics-by-title.csv**
