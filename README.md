@@ -22,7 +22,7 @@ These steps need only to be run once for each machine.
 8. Follow the directions in the terminal window.
 
 ## Using TopicKit
-Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (default is common nouns).
+Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (defaulting to common nouns).
 
 Optionally, to automate creation of stopwords, which may take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
 
@@ -38,13 +38,19 @@ To plot comparative graphs of the distribution of topics, run `do.comparison()`.
 By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import".
 Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below. All work in a project will be saved in a subfolder called by that project name.
 
-Working with a project allows for many useful visualizations of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
+### Exporting data
+Working with a project will automatically export different views of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
 - **topics-by-dynasty.csv**
 - **topics-by-genre.csv**
 - **topics-by-title.csv**
 - **topics-by-year.csv**
 
-Additionally, TopicKit will create word clouds in the project's **plots/** subdirectory, and it will automate a topic comparison for any column containing only two variables. For the Shakespeare project, for example, TopicKit will create the **[Stuart vs Tudor.pdf](http://jmclawson.com/topickit/Stuart-vs-Tudor.pdf)** graphic without being prompted. Beyond any automatic comparison, you can force additional comparisons using the `do.comparison()` function, identifying the column you'd like to consider, and specifying the parameter or parameters to compare. For example, `do.comparison("title", "Julius Caesar")` will produce a **[Julius Caesar vs not Julius Caesar.pdf](http://jmclawson.com/topickit/Julius-Caesar-vs-not-Julius-Caesar.pdf)** graphic demonstrating the topics most closely associated with and against the play *Julius Caesar*, while `do.comparison("genre", "comedy", "history")` makes a **[comedy vs history.pdf](http://jmclawson.com/topickit/comedy-vs-history.pdf)** graphic that scales topics by their affinity to the genre "comedy" against that of "history". To look more closely at a subset of a large number of topics, we might limit the scale by the top and bottom five topics using `do.comparison("genre", "comedy", "history", limit=5)`, the output of which is shown below:
+### Visualizations
+In addition to exporting the data, TopicKit uses Neal Audenaert's scripts to create topic word clouds in the project's **plots/** subdirectory. These word clouds cluster most common words toward the center using a bigger font, with less-common words smaller at the margins.
+
+Furthermore, TopicKit will automate a topic comparison for any column containing only two variables. For the Shakespeare project, for example, TopicKit will create the **[Stuart vs Tudor.pdf](http://jmclawson.com/topickit/Stuart-vs-Tudor.pdf)** graphic without being prompted. This graphic shows the breakdown of each topic for each of the two dynastic periods, and it orders these topics by comparative strength. A topic that is strong in both periods or is weak in both will gravitate toward the middle, while those topics that are notably stronger in one period than the other will be at the top or bottom.
+
+Beyond any automatic comparison, you can force additional comparisons using the `do.comparison()` function, identifying the column you'd like to consider, and specifying the parameter or parameters to compare. For example, `do.comparison("title", "Julius Caesar")` will produce a **[Julius Caesar vs not Julius Caesar.pdf](http://jmclawson.com/topickit/Julius-Caesar-vs-not-Julius-Caesar.pdf)** graphic demonstrating the topics most closely associated with and against the play *Julius Caesar*, while `do.comparison("genre", "comedy", "history")` makes a **[comedy vs history.pdf](http://jmclawson.com/topickit/comedy-vs-history.pdf)** graphic that scales topics by their affinity to the genre "comedy" against that of "history". To look more closely at a subset of a large number of topics, we might limit the scale by the top and bottom five topics using `do.comparison("genre", "comedy", "history", limit=5)`, the output of which is shown below:
 
 ![chart contrasting top five topics for comedies and histories](http://jmclawson.com/topickit/comedy-vs-history.png "Topics in Shakespeare's comedies differ significantly from those found in his histories.")
 
@@ -81,7 +87,7 @@ A sample **import.csv** is included. Either modify that file as a start, or crea
 7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
 ## After the First Run
-With the first run of `do.preparation()`, **TopicKit.R** will save files and will not repeat the process with the same settings. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
+With the first run of `do.preparation()`, **TopicKit.R** will save files to avoid repeating time-consuming processes. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
 1. Erase the **\texts** directory to download texts once again.
 2. Erase the **\txt** directory to divide the text into chunks.
