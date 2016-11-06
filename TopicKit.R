@@ -267,8 +267,8 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
       set.stops <- c(set.stops, readLines(thisfile))
     }
   }
-  set.stops <- c(set.stops, readLines("stop-words/stop-words_english_2_en.txt"))
-  set.stops <- unique(set.stops)
+  set.stops <- c(set.stops, readLines("stopwords.txt"))
+  set.stops <- unique(tolower(set.stops))
   fileConn <- file(paste(set.project,"tk-stops.txt",sep="/"))
   writeLines(set.stops, fileConn)
   close(fileConn)
