@@ -1,5 +1,5 @@
 # TopicKit
-A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit automates many steps for data munging, and it applies best topic modeling practices by default, allowing for prototyping of projects and quick testing of hypotheses with replicability for collaborative projects.
+A basic interface for planning, fetching, topic modeling, and analyzing a corpus of documents from the web. TopicKit automates many steps for data preparation, and it applies best topic modeling practices by default, allowing for prototyping of projects and quick testing of hypotheses for classrooms and collaborative projects.
 
 ## Installation
 These steps need only to be run once for each machine.
