@@ -72,10 +72,10 @@ Next, it attempts to strip out everything but singular common nouns. To change t
 When running the model, it looks for a predetermined number of topics, set by the `set.k` variable. Since there's no good way to programmatically set the number of topics to find in a corpus, TopicKit sets a default of 50 topics. To change this number, modify the `set.k` variable before running `do.model()`:
 > `set.k <- 100`
 
-Even after selecting only for common nouns and searching for named entities, some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list. These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find:
+Even after selecting only for common nouns and searching for named entities, some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list before running `do.model()`:
 >  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia")`
 
-To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
+These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find. To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
 > `set.stops <- c(set.stops, "bertram")`
 
 ## Preparing a Project
