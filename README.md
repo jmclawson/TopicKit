@@ -63,12 +63,16 @@ These word clouds suggest that the biggest topical difference between Shakespear
 Keep in mind that the probabilistic workings of the topic model will make results differ from one run of the model to the next. In the future, TopicKit will add a setting to trigger stability of results across a number of runs.
 
 ## Assumptions and Defaults
-Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into chunks of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (Don't worry; it recombines these documents later.) To change the size of these chunks, redefine `set.chunksize` in the terminal window. Next, it attempts to strip out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
+Following best practices (*citations to come*), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into segments of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (It recombines these documents after running the model.) To change the size of these chunks, redefine `set.chunksize` in the terminal window:
+> `set.chunksize <- 800`
+
+Next, it attempts to strip out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
 > `set.pos <- c("NN", "NNS", "JJ")`
 
-Unfortunately, there's no good way to programmatically set the number of topics to find in a corpus. Since we need to start somewhere, TopicKit sets a default of 50 topics with the `set.k` variable, which you can modify before running `do.model()`.
+When running the model, it looks for a predetermined number of topics, set by the `set.k` variable. Since there's no good way to programmatically set the number of topics to find in a corpus, TopicKit sets a default of 50 topics. To change this number, modify the `set.k` variable before running `do.model()`:
+> `set.k <- 100`
 
-Even after selecting only for common nouns (with `do.preparation()`) and searching for named entities (with `do.stopwords()`), some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list. These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find:
+Even after selecting only for common nouns and searching for named entities, some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list. These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find:
 >  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia")`
 
 To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
