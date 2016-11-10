@@ -60,10 +60,13 @@ makeLocalCopy <- function(url, number, project=set.project) {
     urlid <- unique(urlid)
     urldigits <- strsplit(urlid[1],"")[[1]]
     urldigits.top <- urldigits[1:(length(urldigits)-1)]
-    if (length(urlid)>1) {urlsplit[urlnumber][length(urlsplit[urlnumber])] <- paste(urlid[1],"-8.txt",sep="")}
+    if (length(urlid)>1) {
+      urldigits.bottom <- paste(urlid[1],"-8.txt",sep="")
+    } else {
+      urldigits.bottom <- paste(urlid[1],".txt",sep="")
+      }
     urldigits.top <- paste(paste(urldigits.top,collapse="/"),paste(urldigits,collapse=""),sep="/")
-    urldigits.bottom <- urlsplit[urlnumber][length(urlsplit[urlnumber])]
-    gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
+    mirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
     newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urldigits.bottom,sep="/")
     newurlvector <- c(newurlvector,newurl)
     if (gutencounter>5) {gutencounter <<- 1} else {gutencounter <<- gutencounter + 1}
@@ -344,14 +347,23 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
   # tk.topics.subset[1] <<- with(tk.topics.subset, reorder(tk.topics.subset[1], tk.topics.subset[2])) # might be nice to reorder, if I could get it to work
   tk.topics.subset.m <<- melt(tk.topics.subset)
   tk.topics.subset.m <<- ddply(tk.topics.subset.m, .(variable), transform, rescale = rescale(value))
-  heatmap <- ggplot(tk.topics.subset.m, aes_q(x=quote(variable), y=as.name(colnames(tk.topics.subset.m[1]))))
+  tk.topics.subset.m[,2] <<- paste(gsub("Topic ", "", tk.topics.subset.m[,2]), tk.topwords[as.numeric(gsub("Topic ", "", tk.topics.subset.m[,2]))], sep=". ")
+  if("year" %in% colnames(tk.topics)){
+    years <- c()
+    for(text in tk.topics.subset.m[[1]]){
+      years <- c(years,as.numeric((subset(tk.topics, tk.topics[[2]]==text, select="year")[[1]])))
+    }
+    tk.topics.subset.m <<- cbind(tk.topics.subset.m,years)
+  }
+  heatmap <- ggplot(tk.topics.subset.m, aes_q(x=substitute(reorder(variable, -rescale)), y=as.name(colnames(tk.topics.subset.m[1]))))
+  # if("year" %in% colnames(tk.topics)){heatmap <- heatmap + scale_y_discrete(limits=(tk.topics.subset.m[[1]])[order(tk.topics.subset.m$years,tk.topics.subset.m[[1]],decreasing = T)])}
   heatmap <- heatmap + geom_tile(aes(fill = rescale), colour = "white") 
-  heatmap <- heatmap + scale_fill_gradient(low = "white", high = "darkorange2")
+  heatmap <- heatmap + scale_fill_gradient(low = "white", high = "darkmagenta")
   base_size <- 9
   heatmap <- heatmap + theme_grey(base_size=base_size)
   heatmap <- heatmap + labs(x="", y="")
   heatmap <- heatmap + scale_x_discrete(expand = c(0,0))
-  heatmap <- heatmap + theme(legend.position="none", axis.ticks=element_blank(), axis.text.x=element_text(size=base_size*0.8, angle=270, hjust = 0, colour="grey50"))
+  heatmap <- heatmap + theme(legend.position="none", axis.ticks=element_blank(), axis.text.x=element_text(size=base_size*0.75, angle=270, hjust = 0, colour="grey50"))
   print(heatmap)
   pdf(paste(set.project,"/heatmap", ".pdf", sep=""))
   print(heatmap)
@@ -405,6 +417,7 @@ do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep="
   dist <- dist + scale_y_continuous(labels=abs)
   dist <- dist + xlab("Topics") + ylab(paste("Average variance: ", variancemean, "; Max variance: ", variancemax, sep="")) + scale_fill_discrete(breaks = c(compare,compare2))
   dist <- dist + coord_flip()
+  #dist <- dist + scale_fill_manual(values=c("springgreen","palevioletred1"))
   dist <- dist + geom_point(data=subset(glacier,glacier[,1]==compare2), mapping=aes(y=topicavg), shape=4, show.legend = F)
   print(dist)
   pdf(paste(set.project,"/", compare, " vs ", compare2, ".pdf", sep=""))
