@@ -12,6 +12,12 @@ set.project <- "import"
 set.stability <- FALSE
 set.stability.seed <- 1
 
+get.project <- function(url,projectname){
+  download.file(url, destfile = paste(projectname,".csv",sep=""), method="auto")
+  write("", file = paste(projectname,".csv",sep=""), append=TRUE)
+  set.project <<- projectname
+}
+
 # To run:
 # 1. load this file
 # 2. do.preparation()
@@ -38,24 +44,27 @@ if(!require("ggplot2"))
   install.packages("ggplot2")
 if(!require("reshape2"))
   install.packages("reshape2")
+if(!require("scales"))
+  install.packages("scales")
 
 # Download files to the project folder
 # future variable: download only x texts
 makeLocalCopy <- function(url, number, project=set.project) {
   tk.type <- sapply(strsplit(url, split="\\."), tail, 1L)
-  if (grep("/",tk.type)>0) tk.type <- "html"
+  if (length(grep("/",tk.type))>0) tk.type <- "html"
   # Be kind to Gutenberg by using its mirrors
   urlsplit <- strsplit(url, split="/")[[1]]
   if (length(grep("gutenberg.org",urlsplit))==1) {
     urlnumber <- grep("[0-9]+",urlsplit)
     urlid <- gsub("[\\.a-z\\-]+","",urlsplit[urlnumber])
-    stopifnot(length(unique(urlid))==1)
     urlid <- unique(urlid)
-    urldigits <- strsplit(urlid,"")[[1]]
+    urldigits <- strsplit(urlid[1],"")[[1]]
     urldigits.top <- urldigits[1:(length(urldigits)-1)]
-    urldigits.top <- paste(urldigits.top,collapse="/")
+    if (length(urlid)>1) {urlsplit[urlnumber][length(urlsplit[urlnumber])] <- paste(urlid[1],"-8.txt",sep="")}
+    urldigits.top <- paste(paste(urldigits.top,collapse="/"),paste(urldigits,collapse=""),sep="/")
+    urldigits.bottom <- urlsplit[urlnumber][length(urlsplit[urlnumber])]
     gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
-    newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urlid,paste(urlid,"txt",sep="."),sep="/")
+    newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urldigits.bottom,sep="/")
     newurlvector <- c(newurlvector,newurl)
     if (gutencounter>5) {gutencounter <<- 1} else {gutencounter <<- gutencounter + 1}
     url <- newurl
@@ -64,7 +73,7 @@ makeLocalCopy <- function(url, number, project=set.project) {
   # Continue to download
   tk.thisfilename <- paste(paste(project,"/texts/",sep=""), number, ".", sep="")
   tk.thisfilename.type <- paste(tk.thisfilename, tk.type, sep="")
-  download.file(url, destfile = tk.thisfilename.type, method="auto")
+  download.file(url, destfile = tk.thisfilename.type)
   # Convert HTML to TXT
   if (!tk.type=="txt") {
     library(XML)
@@ -198,13 +207,14 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
   if (!file.exists(project)) {dir.create(file.path(getwd(), project))}
   tk.import <<- read.csv(paste(project,".csv",sep=""), colClasses="character")
   # Load document contents, imputing missing or negative endpoints.
-  if (!file.exists(paste(project,"texts",sep="/"))) {
-    tk.filenames <- c()
-    dir.create(file.path(getwd(), paste(project,"texts",sep="/")))
-    for (number in 1:nrow(tk.import)) {
+  tk.filenames <- c()
+  if (!file.exists(paste(project,"texts",sep="/"))) {dir.create(file.path(getwd(), paste(project,"texts",sep="/")))}
+  for (number in 1:nrow(tk.import)) {
+    if (!file.exists(paste(project,"texts",paste(number,".txt",sep=""),sep="/"))){
       tk.filenames[number] <- makeLocalCopy(url=tk.import[number,1], number=number, project=project)
     }
-  } else {tk.filenames <- paste(project,"texts",paste(1:nrow(tk.import),".txt",sep=""), sep="/")}
+  }
+  tk.filenames <- paste(project,"texts",paste(1:nrow(tk.import),".txt",sep=""), sep="/")
   tk.texts <- c()
   for (number in 1:nrow(tk.import)) {
     tk.texts[number] <- makeCleanText(filename=tk.filenames[number], start=tk.import[number,2], end=tk.import[number,3])
@@ -272,7 +282,7 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
   fileConn <- file(paste(set.project,"tk-stops.txt",sep="/"))
   writeLines(set.stops, fileConn)
   close(fileConn)
-  stoplist <- paste(set.project,"tk-stops.txt",sep="/")
+  stoplist <<- paste(set.project,"tk-stops.txt",sep="/")
   # Train a document model with topics numbering as much as set.k, ignoring stop words
   model <<- trainSimpleLDAModel(docs, k, stoplist=stoplist)# from Audenaert's example1.R which I've renamed to lda.R
   # Print wordclouds for easy visualization.
@@ -324,36 +334,28 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
     if (nrow(tk.topics.by[[factorname]])==2) {
       do.comparison(factorname,tk.topics.by[[factorname]][1,1],tk.topics.by[[factorname]][2,1])
     }
-    #   library(reshape2)
-    #   topicnames <<- colnames(tk.topics.by[[factorname]][,2:ncol(tk.topics.by[[factorname]])])
-    #   melted <<- melt(tk.topics.by[[factorname]], id.vars = factorname, measure.vars=topicnames)
-    #   colnames(melted) <<- c(factorname, "Topic", "Distribution")
-    #   melted [,2] <<- paste(gsub("Topic ", "", melted[,2]), tk.topwords[as.numeric(gsub("Topic ", "", melted[,2]))], sep=". ")
-    #   melted <<- melted[order(melted[[factorname]],melted$Topic),]
-    #   topicavg <<- c()
-    #   for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
-    #   topicavg <<- c(topicavg,topicavg)
-    #   melted <<- cbind(melted,topicavg)
-    #   library(ggplot2)
-    #   dist <- ggplot(data=melted, aes_q(x=substitute(reorder(Topic, topicavg)), y=quote(Distribution), fill=as.name(factorname)))
-    #   dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][1,1]), stat="identity")
-    #   dist <- dist + geom_bar(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), stat="identity", position="identity", mapping=aes(y=-Distribution))
-    #   dist <- dist + scale_y_continuous(labels=abs)
-    #   dist <- dist + xlab("Topics")
-    #   dist <- dist + coord_flip()
-    #   dist <- dist + geom_point(data=subset(melted,melted[,1]==tk.topics.by[[factorname]][2,1]), mapping=aes(y=topicavg), shape=4, show.legend = F)
-    #   tk.dist[[factorname]] <<- dist
-    #   print(dist)
-    #   pdf(paste(set.project,"/distribution-", factorname, ".pdf", sep=""))
-    #   print(dist)
-    #   dev.off()
-    #   # rm(melted,topicavg,topicnames)
-    # }
     rm(factorname,tempdata)
   }
   # Export a master CSV file for analysis.
   write.csv(tk.topics, file=paste(set.project,"/topics",paste(set.pos,collapse="-"),".csv",sep=""))
   View(tk.topics)
+  tk.topics.subset.begin <- ncol(tk.topics)-set.k+1
+  tk.topics.subset <<- tk.topics[,c(2,tk.topics.subset.begin:ncol(tk.topics))]
+  # tk.topics.subset[1] <<- with(tk.topics.subset, reorder(tk.topics.subset[1], tk.topics.subset[2])) # might be nice to reorder, if I could get it to work
+  tk.topics.subset.m <<- melt(tk.topics.subset)
+  tk.topics.subset.m <<- ddply(tk.topics.subset.m, .(variable), transform, rescale = rescale(value))
+  heatmap <- ggplot(tk.topics.subset.m, aes_q(x=quote(variable), y=as.name(colnames(tk.topics.subset.m[1]))))
+  heatmap <- heatmap + geom_tile(aes(fill = rescale), colour = "white") 
+  heatmap <- heatmap + scale_fill_gradient(low = "white", high = "darkorange2")
+  base_size <- 9
+  heatmap <- heatmap + theme_grey(base_size=base_size)
+  heatmap <- heatmap + labs(x="", y="")
+  heatmap <- heatmap + scale_x_discrete(expand = c(0,0))
+  heatmap <- heatmap + theme(legend.position="none", axis.ticks=element_blank(), axis.text.x=element_text(size=base_size*0.8, angle=270, hjust = 0, colour="grey50"))
+  print(heatmap)
+  pdf(paste(set.project,"/heatmap", ".pdf", sep=""))
+  print(heatmap)
+  dev.off()
   message.last <- "Next, run do.comparison(). Be sure to specify what you would like to compare, in the following format: \n do.comparison(\"sex\",\"f\",\"m\")."
   cat(message.last)
 }
@@ -368,6 +370,7 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
 # do.comparison("title","Tender Buttons")
 do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep=""),limit=set.k,project=set.project){
   library(reshape2)
+  library(scales)
   otheraverage <<- t(data.frame(colMeans(subset(tk.topics.by[[factorname]][2:ncol(tk.topics.by[[factorname]])]), factorname!=compare)))
   otheraverage <<- cbind(factorname = paste("not ",compare,sep=""),otheraverage)
   colnames(otheraverage)[1] <<- factorname
