@@ -24,9 +24,9 @@ These steps need only to be run once for each machine.
 ## Using TopicKit
 Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (defaulting to common nouns).
 
-Optionally, to automate creation of stopwords, which may take a long time, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step is optional, but it only needs to be run once.
+Optionally, to automate creation of stop words for the topic model to ignore, run `do.stopwords()`. The script will search each downloaded file for names of persons and places and add these to files in an "entities" folder. This step only needs to be run once, but it significantly improves subsequent topic models. Because finding these named entities takes a long time, consider adding the optional arguments `start` and `end` to limit the scope of the script and work in batches: `do.stopwords(start=1, end=5)`
 
-To derive a topic model, run `do.model()`. The script will attempt to model the topics in all the texts and create word clouds using scripts slightly modified from [Neal Audenaert's work] (https://github.com/audenaert/TopicModelingRTools). To skip making word clouds, which can take time, add the optional `wordclouds` argument inside parentheses: `do.model(wordclouds=FALSE)`.  After running the model, TopicKit will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
+To derive a topic model, run `do.model()`. The script will attempt to model the topics in all the texts and create word clouds using scripts slightly modified from [Neal Audenaert's work] (https://github.com/audenaert/TopicModelingRTools). To skip making word clouds, which can take time, add the optional `wordclouds` argument inside parentheses: `do.model(wordclouds=FALSE)`; skipped word clouds can always be plotted after the fact using `do.wordclouds()`.  After running the model, TopicKit will splice against each optional column in the original CSV to visualize averages for different kinds of texts.
 
 To plot comparative graphs of the distribution of topics, run `do.comparison()`. The first argument should be the column name in the original CSV, and the second argument should indicate the value of that column to analyze. An optional third argument indicates what the comparison should baseline against, while the `limit` argument focuses the chart on a subset of most-relevant data when the number of topics is too high. Typical uses of this function include the following:
 
@@ -35,7 +35,18 @@ To plot comparative graphs of the distribution of topics, run `do.comparison()`.
 - `do.comparison("sex", "f", "m", limit=20)`
 
 ## Working with Projects
-By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below. All work in a project will be saved in a subfolder called by that project name.
+By default, TopicKit will work with a CSV file called **import.csv** to create a project called "import". Run `set.project` to see which project is currently set; to change it to the sample Shakespeare data set, use the following command: `set.project <- "shakespeare"`. To create your own project, see [Preparing a Project](#preparing-a-project), below.
+
+Alternatively, to work with a project file located online, use the command `get.project(url, projectname)`, replacing `url` with the file URL and `projectname` with whatever you'd like to call the project locally. TopicKit will download the project file and ready it for local modelling. Online project files are ideal for use with Google Spreadsheets, which allow for collaboration and which can publish a spreadsheet as a CSV file.
+
+All work in a project will be saved in a subfolder called by that project name.
+
+### Working in R
+For analysis in R, TopicKit prepares data in a few key data frames:
+
+1. `tk.import` includes the data imported from the project CSV file. Use the command `View(tk.import)` to see this data frame in RStudio.
+2. `tk.topics` combines metadata from `tk.import` with results from the topic model. To ease use of this data in R, each topic column includes the top five words as a variable lable. Use the command `View(tk.topics)` to see this data frame in RStudio and to sort by each column.
+3. `tk.topics.by` provides a list of data frames, each offering a specific splice of results against one of the columns of metadata. For example, the **shakespeare.csv** data set will offer `tk.topics.by$title`, `tk.topics.by$year`, `tk.topics.by$genre`, and `tk.topics.by$dynasty`, among others. After the dollar sign, RStudio will offer the option to choose from a menu of options, which is handy for discovery.
 
 ### Exporting data
 After running the project model, TopicKit will automatically export different views of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
