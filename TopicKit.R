@@ -19,10 +19,6 @@ get.project <- function(url,projectname){
   set.project <<- projectname
 }
 
-# necessary to avoid hitting any one gutenberg mirror too hard
-gutencounter <- sample(1:6, 1)
-newurlvector <- c()
-
 # Set up and install some required packages
 if(!require("XML"))
   install.packages("XML")
@@ -200,6 +196,9 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
   }
   if (!file.exists(project)) {dir.create(file.path(getwd(), project))}
   tk.import <<- read.csv(paste(project,".csv",sep=""), colClasses="character")
+  # necessary to avoid hitting any one gutenberg mirror too hard
+  gutencounter <- sample(1:6, 1)
+  newurlvector <- c()
   # Load document contents, imputing missing or negative endpoints.
   tk.filenames <- c()
   if (!file.exists(paste(project,"texts",sep="/"))) {dir.create(file.path(getwd(), paste(project,"texts",sep="/")))}
@@ -245,8 +244,8 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
 }
 
 ### Run this function to automate stopwords.# It is time intensive.# future variable: batch prepare only x texts
-do.stopwords <- function(project=set.project){
-  for (text in 1:nrow(tk.import)){
+do.stopwords <- function(project=set.project, start=1, end=nrow(tk.import)){
+  for (text in start:end){
     textfile <- paste(text,".txt",sep="")
     makeFilterWords(project=project,file=textfile)
   }
@@ -283,10 +282,7 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
   # Train a document model with topics numbering as much as set.k, ignoring stop words
   model <<- trainSimpleLDAModel(docs, k, stoplist=stoplist)# from Audenaert's example1.R which I've renamed to lda.R
   # Print wordclouds for easy visualization.
-  if (wordclouds==T) {
-    print("printing topic word clouds")
-    plotTopicWordcloud(model, verbose=T, output=paste(set.project,"plots",sep="/"))
-  }
+  if (wordclouds==T) {do.wordclouds()}
   print("preparing results for analysis")
   # Get and clean up the ids and add them alongside the topics
   library(plyr)
@@ -368,6 +364,10 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
   cat(message.last)
 }
 
+do.wordclouds <- function(){
+  print("printing topic word clouds")
+  plotTopicWordcloud(model, verbose=T, output=paste(set.project,"plots",sep="/"))
+}
 
 ### Run this function to look more closely at particular factors.
 # With the sample import.csv, try some of the following:
@@ -424,6 +424,7 @@ do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep="
 message.1 <- "To start, set the name of your project before initializing preparation. If your project file is named \"shakespeare.csv\", for example, enter the following commands: \n set.project <- \"shakespeare\" \n do.preparation()"
 
 cat(message.1)
+rm(message.1,xpdf.cmd)
 
 
 # Acknowledgments (to be added to a NOTICES file)
