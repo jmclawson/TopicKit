@@ -45,8 +45,9 @@ All work in a project will be saved in a subfolder called by that project name.
 For analysis in R, TopicKit prepares data in a few key data frames:
 
 1. `tk.import` includes the data imported from the project CSV file. Use the command `View(tk.import)` to see this data frame in RStudio.
-2. `tk.topics` combines metadata from `tk.import` with results from the topic model. To ease use of this data in R, each topic column includes the top five words as a variable lable. Use the command `View(tk.topics)` to see this data frame in RStudio and to sort by each column.
+2. `tk.topics` combines metadata from `tk.import` with results from the topic model. To ease use of this data in R, each topic column includes the [top five words as a variable lable](http://jmclawson.com/topickit/topic-top-words.png "Top words appear in column headers for each topic in the tk.topics data frame."). Use the command `View(tk.topics)` to see this data frame in RStudio and to sort by each column.
 3. `tk.topics.by` provides a list of data frames, each offering a specific splice of results against one of the columns of metadata. For example, the **shakespeare.csv** data set will offer `tk.topics.by$title`, `tk.topics.by$year`, `tk.topics.by$genre`, and `tk.topics.by$dynasty`, among others. After the dollar sign, RStudio will offer the option to choose from a menu of options, which is handy for discovery.
+![image showing RStudio's completion suggestions](http://jmclawson.com/topickit/rstudio-autocomplete.png "RStudio's suggested completions are handy for discovering available views.")
 
 ### Exporting data
 After running the project model, TopicKit will automatically export different views of the resulting data. For example, after running the commands on the sample Shakespeare data set, a number of files will be made available in the **shakespeare/** directory on your computer. Among them will be CSV files exported for other analysis including **topicsNN.csv**—a master file containing all the information—and the following divisions, derived automatically from columns in the initial spreadsheet:
@@ -83,7 +84,7 @@ Next, it attempts to strip out everything but singular common nouns. To change t
 When running the model, it looks for a predetermined number of topics, set by the `set.k` variable. Since there's no good way to programmatically set the number of topics to find in a corpus, TopicKit sets a default of 50 topics. To change this number, modify the `set.k` variable before running `do.model()`:
 > `set.k <- 100`
 
-Even after selecting only for common nouns and searching for named entities, some character or place names will still sneak through into your model. Use the `set.stops` variable to add names to a stop list before running `do.model()`:
+When skipping the `do.stopwords()` process, it is still possible to set certain words for the topic model to overlook. In fact, even documents have been prepared and named entities have been found, some character or place names might still sneak through into your model. Use the `set.stops` variable to add names to a stop list before running `do.model()`:
 >  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia")`
 
 These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find. To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
