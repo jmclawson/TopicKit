@@ -12,24 +12,16 @@ set.project <- "import"
 set.stability <- FALSE
 set.stability.seed <- 1
 
+# to download a hosted CSV (which will often lack an end-of-file indication)
 get.project <- function(url,projectname){
   download.file(url, destfile = paste(projectname,".csv",sep=""), method="auto")
   write("", file = paste(projectname,".csv",sep=""), append=TRUE)
   set.project <<- projectname
 }
 
-# To run:
-# 1. load this file
-# 2. do.preparation()
-# - 2.5 (optional) do.stopwords()
-# 3. do.model()
-# 4 do.comparison("sex","f","m") 
-
 # necessary to avoid hitting any one gutenberg mirror too hard
 gutencounter <- sample(1:6, 1)
 newurlvector <- c()
-
-# Default k variable set by number of texts?
 
 # Set up and install some required packages
 if(!require("XML"))
@@ -48,7 +40,6 @@ if(!require("scales"))
   install.packages("scales")
 
 # Download files to the project folder
-# future variable: download only x texts
 makeLocalCopy <- function(url, number, project=set.project) {
   tk.type <- sapply(strsplit(url, split="\\."), tail, 1L)
   if (length(grep("/",tk.type))>0) tk.type <- "html"
@@ -188,7 +179,7 @@ tk.filter.name <- function(project=set.project, file, kind="person"){
 
 makeFilterWords <- function(project=set.project, file){
   if (!file.exists(paste(project,"entities",sep="/"))) {dir.create(paste(project, "entities", sep="/"))}
-  if (!file.exists(paste(project,"/entities/","both-",file))) {
+  if (!file.exists(paste(project,"/entities/","both-",file,sep=""))) {
     startfile <- paste(paste(project, "texts/", sep="/"),file,sep="")
     txt <- as.String(readLines(startfile))
     filterperson <- Maxent_Entity_Annotator(kind = "person")
@@ -202,7 +193,7 @@ makeFilterWords <- function(project=set.project, file){
   }
 }
 
-### Run this function to download and prepare texts.
+### Run this function to download and prepare texts.# future variable: batch prepare only x texts
 do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunksize) {
   if (!file.exists(paste(project, ".csv", sep=""))) {
     stop("Please make sure to specify a CSV file in the working directory.")
@@ -243,14 +234,17 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
     library(NLP)
     library(openNLP)
     for (file in list.files(path=paste(project, "txt/", sep="/"))) {
-      makeFilterTokens(file=file, pos=pos, dir=tk.dir, entities="both", project=project)
+      if (pos=="") {
+        file.copy(from=paste(project,"/txt/",file,sep=""), to=paste(project,"/txt-/",file,sep=""), overwrite = T, recursive = F, copy.mode = TRUE)
+      } else {
+        makeFilterTokens(file=file, pos=pos, dir=tk.dir, entities="both", project=project)
+      }
     }
   }
   print("Next, run do.stopwords(), or skip ahead to do.model().")
 }
 
-### Run this function to automate stopwords.
-# It is time intensive.
+### Run this function to automate stopwords.# It is time intensive.# future variable: batch prepare only x texts
 do.stopwords <- function(project=set.project){
   for (text in 1:nrow(tk.import)){
     textfile <- paste(text,".txt",sep="")
@@ -296,6 +290,8 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
   print("preparing results for analysis")
   # Get and clean up the ids and add them alongside the topics
   library(plyr)
+  library(reshape2)
+  library(scales)
   tk.ids <<- gsub("^n|-.*$","", model$documents[,1])
   tk.ids <<- type.convert(tk.ids,numerals="no.loss")
   tk.import.analysis <- cbind(id=1:nrow(tk.import),tk.import[,4:ncol(tk.import)])
@@ -381,8 +377,8 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
 # Note that omitting the third argument compares against the average of the whole corpus:
 # do.comparison("title","Tender Buttons")
 do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep=""),limit=set.k,project=set.project){
-  library(reshape2)
-  library(scales)
+  # library(reshape2)
+  # library(scales)
   otheraverage <<- t(data.frame(colMeans(subset(tk.topics.by[[factorname]][2:ncol(tk.topics.by[[factorname]])]), factorname!=compare)))
   otheraverage <<- cbind(factorname = paste("not ",compare,sep=""),otheraverage)
   colnames(otheraverage)[1] <<- factorname
