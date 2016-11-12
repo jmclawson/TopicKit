@@ -84,7 +84,7 @@ When running the model, it looks for a predetermined number of topics, set by th
 > `set.k <- 100`
 
 When skipping the `do.stopwords()` process, it is still possible to set certain words for the topic model to overlook. In fact, even documents have been prepared and named entities have been found, some character or place names might still sneak through into your model. Use the `set.stops` variable to add names to a stop list before running `do.model()`:
->  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia")`
+>  `set.stops <- c("cleopatra", "caesar", "petruchio", "malvolio", "tranio", "antonio", "prospero", "armado", "ajax", "hector", "nestor", "gloucester", "clarence", "dromio", "timon", "cassio", "claudio", "arcite", "julia", "brabantio")`
 
 These names don't persist if you reload **TopicKit.R**, so it might be a good idea to make note of those you find. To add a single name to an existing list of stopwords, just add `set.stops` within the parentheses:
 > `set.stops <- c(set.stops, "bertram")`
