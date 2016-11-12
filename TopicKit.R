@@ -35,6 +35,10 @@ if(!require("reshape2"))
 if(!require("scales"))
   install.packages("scales")
 
+# necessary to avoid hitting any one gutenberg mirror too hard
+gutencounter <- sample(1:6, 1)
+newurlvector <- c()
+
 # Download files to the project folder
 makeLocalCopy <- function(url, number, project=set.project) {
   tk.type <- sapply(strsplit(url, split="\\."), tail, 1L)
@@ -53,7 +57,7 @@ makeLocalCopy <- function(url, number, project=set.project) {
       urldigits.bottom <- paste(urlid[1],".txt",sep="")
       }
     urldigits.top <- paste(paste(urldigits.top,collapse="/"),paste(urldigits,collapse=""),sep="/")
-    mirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
+    gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
     newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urldigits.bottom,sep="/")
     newurlvector <- c(newurlvector,newurl)
     if (gutencounter>5) {gutencounter <<- 1} else {gutencounter <<- gutencounter + 1}
@@ -196,9 +200,6 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
   }
   if (!file.exists(project)) {dir.create(file.path(getwd(), project))}
   tk.import <<- read.csv(paste(project,".csv",sep=""), colClasses="character")
-  # necessary to avoid hitting any one gutenberg mirror too hard
-  gutencounter <- sample(1:6, 1)
-  newurlvector <- c()
   # Load document contents, imputing missing or negative endpoints.
   tk.filenames <- c()
   if (!file.exists(paste(project,"texts",sep="/"))) {dir.create(file.path(getwd(), paste(project,"texts",sep="/")))}
@@ -215,7 +216,7 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
   tk.chunks <- list()
   # If directory "txt" doesn't exist, write text to files in chunks ~1,000 each
   if (!dir.exists(paste(project, "txt", sep="/"))) {
-    dir.create(paste(project,"txt",sep="/"))
+    dir.create(paste(project,"txt",sep="/"))}
     for (number in 1:nrow(tk.import)) {
       tk.chunks[[number]] <- makeFlexTextChunks(tk.texts[number], chunk.size = chunksize, percentage = FALSE)
     }
@@ -225,18 +226,17 @@ do.preparation <- function(project=set.project, pos=set.pos, chunksize=set.chunk
         write(tk.chunks[[number]][sub],file=filename,append=FALSE,sep="")
       }
     }
-  }
   # If directory "txt-[POS]" doesn't exist, run makeFilterTokens to strip out all but part of speech
   tk.dir <<- paste(paste(project, "txt-", sep="/"), paste(pos, collapse="-"), sep="")
-  if (!dir.exists(tk.dir)) {
-    dir.create(file.path(tk.dir))
-    library(NLP)
-    library(openNLP)
-    for (file in list.files(path=paste(project, "txt/", sep="/"))) {
+  if (!dir.exists(tk.dir)) {dir.create(file.path(tk.dir))}
+  for (file in list.files(path=paste(project,"txt/",sep="/"))) {
+    if (!file.exists(paste(tk.dir,file,sep="/"))) {
+      library(NLP)
+      library(openNLP)
       if (pos=="") {
         file.copy(from=paste(project,"/txt/",file,sep=""), to=paste(project,"/txt-/",file,sep=""), overwrite = T, recursive = F, copy.mode = TRUE)
       } else {
-        makeFilterTokens(file=file, pos=pos, dir=tk.dir, entities="both", project=project)
+          makeFilterTokens(file=file, pos=pos, dir=tk.dir, entities="both", project=project)
       }
     }
   }
@@ -327,7 +327,7 @@ do.model <- function(project=set.project,k=set.k,pos=set.pos,wordclouds=T,stabil
     write.csv(tempdata,file=paste(set.project,"/topics-by-",factorname,".csv",sep=""))
     # Add a special visualization for binary factors.
     if (nrow(tk.topics.by[[factorname]])==2) {
-      do.comparison(factorname,tk.topics.by[[factorname]][1,1],tk.topics.by[[factorname]][2,1])
+      do.comparison(factorname,tk.topics.by[[factorname]][1,1],tk.topics.by[[factorname]][2,1],k=k)
     }
     rm(factorname,tempdata)
   }
@@ -376,7 +376,7 @@ do.wordclouds <- function(){
 #
 # Note that omitting the third argument compares against the average of the whole corpus:
 # do.comparison("title","Tender Buttons")
-do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep=""),limit=set.k,project=set.project){
+do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep=""),k=set.k,limit=k,project=set.project){
   # library(reshape2)
   # library(scales)
   otheraverage <<- t(data.frame(colMeans(subset(tk.topics.by[[factorname]][2:ncol(tk.topics.by[[factorname]])]), factorname!=compare)))
@@ -394,7 +394,7 @@ do.comparison <- function(factorname,compare,compare2=paste("not ",compare,sep="
   tosort <<- c(compare,compare2)
   melted <<- melted[order(match(melted[[factorname]],tosort),melted$Topic),]
   topicavg <<- c()
-  for (row in 1:set.k) {topicavg[row] <<- melted[row,3]-melted[row+set.k,3]}
+  for (row in 1:k) {topicavg[row] <<- melted[row,3]-melted[row+k,3]}
   topicavg <<- c(topicavg,topicavg)
   variancemean <<- paste(round(mean(abs(topicavg))*100,digits=2),"%",sep="")
   variancemax <<- paste(round(max(abs(topicavg))*100,digits=2),"%",sep="")
