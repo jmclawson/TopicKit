@@ -18,8 +18,8 @@ These steps need only to be run once for each machine.
 4. [Download TopicKit] (https://github.com/jmclawson/TopicKit/archive/master.zip) from GitHub and unzip the files into one directory.
 5. Add the CSV file for your project into this same directory, or choose one of the sample data sets. (See below for more on project spreadsheets.)
 6. In RStudio, set your working directory to the folder containing TopicKit, e.g., `setwd("~/Documents/TopicKit")`.
-7. In the terminal pane, load `TopicKit.R` with the following command: `source("TopicKit.R")`.
-8. Follow the directions in the terminal window.
+7. In the console pane, load `TopicKit.R` with the following command: `source("TopicKit.R")`.
+8. Follow the directions in the console window.
 
 ## Using TopicKit
 Set the working directory and load TopicKit.R with `source('TopicKit.R')`. To collect a corpus and prepare it, run `do.preparation()`. The script will download text or HTML files, divide them into chunks of 1,000 words each, and do its best to extract a given part of speech (defaulting to common nouns).
@@ -74,7 +74,7 @@ These word clouds suggest that the biggest topical difference between Shakespear
 Keep in mind that the probabilistic workings of the topic model will make results differ from one run of the model to the next. In the future, TopicKit will add a setting to trigger stability of results across a number of runs.
 
 ## Assumptions and Defaults
-Following best practices (see [Matthew Jockers](http://www.matthewjockers.net/2013/04/12/secret-recipe-for-topic-modeling-themes/ "'Secret' Recipe for Topic Modeling Themes")), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into segments of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (It recombines these documents after running the model.) To change the size of these chunks, redefine `set.chunksize` in the terminal window:
+Following best practices (see [Matthew Jockers](http://www.matthewjockers.net/2013/04/12/secret-recipe-for-topic-modeling-themes/ "'Secret' Recipe for Topic Modeling Themes")), TopicKit will prepare data before attempting to model the topics of a corpus. First, it divides documents into segments of 1000 words to get something approaching parity of size among all the documents in a corpus and to avoid confusing the model. (It recombines these documents after running the model.) To change the size of these chunks, redefine `set.chunksize` in the console window:
 > `set.chunksize <- 800`
 
 Next, it attempts to strip out everything but singular common nouns. To change this focus to other parts of speech, use the [part-of-speech tags associated with the Penn Treebank](http://www.ling.upenn.edu/courses/Fall_2003/ling001/penn_treebank_pos.html). For example, to model singular and plural common nouns along with adjectives, use the following line: 
@@ -116,7 +116,7 @@ TopicKit works with many packages at once, so it's inevitable that it will event
 
 * `input string 1 is invalid in this locale`
 
-  > In the terminal, enter `Sys.setlocale('LC_ALL','C')` and then try again.
+  > In the console, enter `Sys.setlocale('LC_ALL','C')` and then try again.
   
 * `TEXT_SHOW_BACKTRACE environmental variable.`
 
