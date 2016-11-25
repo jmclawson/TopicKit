@@ -100,6 +100,14 @@ A sample **import.csv** is included. Either modify that file as a start, or crea
 6. Add data in additional columns for each text.
 7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
+### Using Local Texts
+
+While TopicKit is designed in part to help collect and import a data set from across the internet, it also works well with local files for texts that may not be publically available. Just use a pathname instead of URL in the first column.
+
+> On a Mac, the pathname should begin with `file:~`. I believe the tilde is unique to the Mac, but I need to verify that `file:` works for Windows machines.
+
+On a Mac, it's easy to get a file's location by right-clicking on a file, holding the Option key, and choosing "[Copy X as Pathname](http://jmclawson.com/topickit/pathname.png)." When you paste the path into your spreadsheet, remember to add `file:~` at the start.
+
 ## After the First Run
 With the first run of `do.preparation()`, **TopicKit.R** will save files to avoid repeating time-consuming processes. On subsequent runs, delete directories to repeat elements that are otherwise skipped:
 
