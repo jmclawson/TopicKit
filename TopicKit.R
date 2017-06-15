@@ -57,7 +57,7 @@ makeLocalCopy <- function(url, number, project=set.project) {
       urldigits.bottom <- paste(urlid[1],".txt",sep="")
       }
     urldigits.top <- paste(paste(urldigits.top,collapse="/"),paste(urldigits,collapse=""),sep="/")
-    gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://sailor.gutenberg.lib.md.us", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
+    gutenmirrors <- c("http://mirror.csclub.uwaterloo.ca/gutenberg", "http://aleph.gutenberg.org", "http://mirrors.xmission.com/gutenberg", "http://gutenberg.pglaf.org", "http://aleph.gutenberg.org", "http://gutenberg.readingroo.ms")
     newurl <- paste(gutenmirrors[gutencounter],urldigits.top,urldigits.bottom,sep="/")
     newurlvector <- c(newurlvector,newurl)
     if (gutencounter>5) {gutencounter <<- 1} else {gutencounter <<- gutencounter + 1}
