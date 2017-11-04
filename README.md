@@ -98,7 +98,8 @@ A sample **import.csv** is included. Either modify that file as a start, or crea
 4. Into the second column, copy and paste some words from the first line of the text to be modeled. Alternatively, include a line number for this first line. Web pages and text files often include headers with unnecessary information, and we want to ignore the irrelevant stuff. 
 > When including a string of words in this column or the next, it is best not to copy an entire line; rather, select a string of unique-enough words to bypass anything that appears before it. Shorter is better, and avoiding commas and (especially) quotation marks is paramount.
 > The fastest workflow I've found with local files is to use a text editor that indicates line numbers, like TextMate.
-5. Into the third column, copy and paste the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number or (as a negative number) the number of lines from the bottom.
+5. Into the third column, copy and paste a string of words from the last line to be modeled, excluding any irrelevant footer. Alternatively, include the line number from the top or (as a negative number) the number of lines from the bottom. 
+> As before, avoid choosing a string of words that has much punctuation, especially commas and quotation marks. Three words will often be enough to avoid ambiguously pointing to multiple lines in the text.
 6. Add data in additional columns for each text.
 7. Save the spreadsheet as a CSV file in the same folder as **TopicKit.R**. You can name the file whatever you like, but the scripts will look for **import.csv** by default. If instead you've named your file **shakespeare.csv**, make sure to set the project name before beginning using the command `set.project <- "shakespeare"`.
 
