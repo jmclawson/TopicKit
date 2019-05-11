@@ -136,6 +136,6 @@ TopicKit works with many packages at once, so it's inevitable that it will event
 * `In postDrawDetails(x) : reached elapsed time limit`
 
   > I get this error intermittently, and each time seems to be for a seemingly random function in place of `postDrawDetails(x)` each time. I think it happens only after I've first overtaxed my system with a big data set. I haven't found any trouble ignoring it and running the function again.
-  
-  ## Future
-  I am currently in the process of turning these scripts into an easily accessed package for R. Watch this space.
+
+## Future
+I am currently in the process of turning these scripts into an easily accessed package for R. Watch this space.
